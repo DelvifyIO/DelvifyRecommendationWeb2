@@ -1,0 +1,49 @@
+// Header
+header.header1.fixed-header
+    // Header desktop
+    .container-menu-header
+        .wrap_header
+            // Logo
+            a.logo(href='index.html')
+                img(src='../images/icons/logo.png', alt='IMG-LOGO')
+            // Menu
+            .wrap_menu
+                nav.menu
+                    ul.main_menu
+                        li
+                            a(href='index.html') Home
+                        li#menuCategories
+                            a(href='product.html') Categories
+            // Header Icon
+            .header-icons
+                .header-wrapicon2
+                    a(href='cart.html')
+                        img.header-icon1.js-show-header-dropdown(src='../images/icons/icon-header-02.png', alt='ICON')
+                        span.header-icons-noti 0
+    // Header Mobile
+    .wrap_header_mobile
+        // Logo moblie
+        a.logo-mobile(href='index.html')
+            img(src='../images/icons/logo.png', alt='IMG-LOGO')
+        // Button show menu
+        .btn-show-menu
+            // Header Icon mobile
+            .header-icons-mobile
+                span.linedivide2
+                .header-wrapicon2
+                    a(href='cart.html')
+                        img.header-icon1.js-show-header-dropdown(src='../images/icons/icon-header-02.png', alt='ICON')
+                        span.header-icons-noti 0
+            .btn-show-menu-mobile.hamburger.hamburger--squeeze
+                span.hamburger-box
+                    span.hamburger-inner
+    // Menu Mobile
+    .wrap-side-menu
+        nav.side-menu
+            ul.main-menu
+                li.item-menu-mobile
+                    a(href='index.html') Home
+                li.item-menu-mobile
+                    a(href='product.html') Categories
+                    ul.sub-menu.categoriesSubMenu
+                    i.arrow-main-menu.fa.fa-angle-right(aria-hidden='true')

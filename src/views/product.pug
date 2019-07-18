@@ -1,0 +1,36 @@
+extends layout
+
+block config
+    - var title = "Products";
+
+block styles
+    link(rel='stylesheet', type="text/css", href='../vendor/noui/nouislider.min.css')
+
+block content
+    // Title Page
+    section.bg-title-page.p-t-50.p-b-40.flex-col-c-m(style='background-image: url(../images/heading-banner-02.jpg); background-position: bottom')
+        h2.l-text2.t-center
+            | Products
+        p.m-text13.t-center
+            | New Arrivals
+    // Content page
+    section.bgwhite.p-t-55.p-b-65
+        .container
+            .row
+                .col-sm-6.col-md-4.col-lg-3.p-b-50
+                    .leftbar.p-r-20.p-r-0-sm
+                        #searchBar
+                        //
+                        h4.m-text14.p-b-7
+                            | Categories
+                        ul.p-b-54#sideCatMenu
+                .col-sm-6.col-md-8.col-lg-9.p-b-50
+                    // Product
+                    .row#productList
+                    // Pagination
+                    .pagination.flex-m.flex-w.p-t-26#pagination
+
+block scripts
+    script(src="../dist/searchBar.bundle.js")
+    script(src="../dist/product.bundle.js")
+    script(src="../dist/widget.bundle.js")
