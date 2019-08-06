@@ -85,7 +85,7 @@ $( document ).ready(function() {
 
         return false;
     } else {
-        api('GET', "/product", param).done((response) => {
+        api('GET', "/product", param, (response) => {
             const pages = Math.ceil(response.count / limit);
             const products = response.rows;
             for(let i = 0; i < products.length; i++) {

@@ -1,5 +1,5 @@
 $( document ).ready(function() {
-    api('GET', '/category/featured', { limit: 5 }).done((response) => {
+    api('GET', '/category/featured', { limit: 5 }, (response) => {
         let content = '';
         for (let i = 0; i < 5; i++) {
             const category = response[i];

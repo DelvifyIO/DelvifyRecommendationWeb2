@@ -6,21 +6,24 @@ $( document ).ready(function() {
     let promises = [];
     if (cart.items.length > 0) {
         promises = cart.items.map(function ({ sku, quantity }) {
-            return api('GET', '/product', { sku }).done((item) => {
-                $('#table').append(
-                    "<tr class=\"table-row\" id=\"table-row-" + sku + "\">" +
-                    "<td class=\"column-1\">" +
-                    "<div class=\"cart-img-product b-rad-4 o-f-hidden\" data-pid=\"" + item.sku + "\">" +
-                    "<img src=\"" + item.images[0].url200 + "\" alt=\"IMG-PRODUCT\">" +
-                    "</div>" +
-                    "</td>" +
-                    "<td class=\"column-2\">" + item.name + "</td>" +
-                    "<td class=\"column-3\"><span>" + item.currency.sign + "</span><span class='item-price'>" + item.price + "</span></td>" +
-                    "<td class=\"column-4 t-center\">" + quantity + "</td>" +
-                    "<td class=\"column-5\"><span>" + item.currency.sign + "</span><span class='item-total-price'>" + item.price * quantity + "</span></td>" +
-                    "</tr>");
-                total += item.price * quantity;
-                currencySign = item.currency.sign;
+            return new Promise((resolve, reject) => {
+                api('GET', '/product', { sku }, (item) => {
+                    $('#table').append(
+                        "<tr class=\"table-row\" id=\"table-row-" + sku + "\">" +
+                        "<td class=\"column-1\">" +
+                        "<div class=\"cart-img-product b-rad-4 o-f-hidden\" data-pid=\"" + item.sku + "\">" +
+                        "<img src=\"" + item.images[0].url200 + "\" alt=\"IMG-PRODUCT\">" +
+                        "</div>" +
+                        "</td>" +
+                        "<td class=\"column-2\">" + item.name + "</td>" +
+                        "<td class=\"column-3\"><span>" + item.currency.sign + "</span><span class='item-price'>" + item.price + "</span></td>" +
+                        "<td class=\"column-4 t-center\">" + quantity + "</td>" +
+                        "<td class=\"column-5\"><span>" + item.currency.sign + "</span><span class='item-total-price'>" + item.price * quantity + "</span></td>" +
+                        "</tr>");
+                    total += item.price * quantity;
+                    currencySign = item.currency.sign;
+                    resolve();
+                });
             });
         });
     } else {
@@ -43,11 +46,14 @@ $( document ).ready(function() {
         const cart = JSON.parse(sessionStorage.getItem('delvify_cart')) || { items: [] };
         const items = [];
         const getItems = cart.items.map(function ({ sku, quantity }) {
-            return api('GET', '/product', { sku }).done((item) => {
-                items.push({ pid: item.sku, quantity, currency: item.currency.name, price: item.price });
+            return new Promise((resolve, reject) => {
+                api('GET', '/product', { sku }, (item) => {
+                    items.push({ pid: item.sku, quantity, currency: item.currency.name, price: item.price });
+                    resolve();
+                });
             });
         });
-        Promise.all(getItems).then(() => {
+        Promise.all(getItems).then((results) => {
             if (getItems.length > 0) {
                 swal('Success', "order placed", "success");
                 const oid = `${Math.floor(Math.random() * 2147483647)}.${Date.now()}`;

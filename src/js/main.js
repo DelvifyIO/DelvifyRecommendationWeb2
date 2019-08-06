@@ -199,7 +199,7 @@
     });
 
     $( document ).ready(function() {
-        api('GET', '/category', {}).done(function(categories, status) {
+        api('GET', '/category', {}, function(categories, status) {
             const category = getQuery()['category'];
             const keyword = getQuery()['keyword'];
             $("#menuCategories").append("<ul class='sub_menu categoriesSubMenu'></ul>");

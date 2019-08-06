@@ -1,26 +1,19 @@
 
-export function api(method = 'GET', url = '', param = {}) {
+export function api(method = 'GET', url = '', param = {}, onSuccess) {
     const { id, verbal = false, ...params } = param;
     url = process.env.API_HOST + url;
-    $.ajaxSetup({
+    if (id) {
+        url = url + `/${id}`;
+    }
+    $.ajax({
+        type: method,
+        url: url,
+        data: params,
+        success: onSuccess,
         headers:{
             merchantid: 'db2',
         }
     });
-    if (id) {
-        url = url + `/${id}`;
-    }
-    if (method === 'GET') {
-        return $.get(url, params).then((response) =>{
-            console.log(`${method}:${url}`, {params, response});
-            return Promise.resolve(response);
-        });
-    } else {
-        return $.post(url, params).then((response) =>{
-            console.log(`${method}:${url}`, {params, response});
-            return Promise.resolve(response);
-        });
-    }
 }
 
 export function readFile(file, options = { type: 'text', onSuccess: () => {} }) {

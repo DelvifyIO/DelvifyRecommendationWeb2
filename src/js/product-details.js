@@ -2,7 +2,7 @@
 $( document ).ready(function() {
     const sku = getQuery()["sku"] || 1;
 
-    api('GET', `/product`, { sku }).done((item) => {
+    api('GET', `/product`, { sku }, (item) => {
         $('#productName').text(item.name);
         $('#productPrice').text(`${item.currency.sign}${item.price}`);
         $('#productDescription').text(item.description);
