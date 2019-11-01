@@ -2467,3 +2467,11 @@ input.num-product::-webkit-inner-spin-button {
     flex: 1 1 65%;
 }
 
+.search-product {
+    right: 95px;
+    top: 14px;
+}
+.search-product .size6 {
+    height: 35px;
+}
+
