@@ -63,9 +63,9 @@ const search = function(keyword) {
     } else if (keyword.includes("no buttons") || keyword.includes("no zips") || keyword.includes("no sleeves")) {
         if (keyword.includes("no buttons")) {
             result.skus = tshirt.filter(function(item) { return !buttons.includes(item) });
-        } else if ("no zips") {
+        } else if (keyword.includes("no zips")) {
             result.skus = tshirt.filter(function(item) { return !zips.includes(item) });
-        } else if ("no sleeves") {
+        } else if (keyword.includes("no sleeves")) {
             result.skus = nosleeves;
         }
         return Promise.resolve(result);
