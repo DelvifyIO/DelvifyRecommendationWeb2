@@ -68,7 +68,7 @@ const search = function(keyword) {
         } else if ("no sleeves") {
             result.skus = nosleeves;
         }
-        return Promise.resolve({ result: result });
+        return Promise.resolve(result);
     } else if (keyword.includes("flower") ||
         keyword.includes("floral")  || keyword.includes("flora") ||
         keyword.includes("spring") ||
@@ -82,10 +82,10 @@ const search = function(keyword) {
         if (keyword.includes("colorful") || keyword.includes("colerful")) {
             result.skus.push(colorful);
         }
-        return Promise.resolve({ result: result });
+        return Promise.resolve(result);
     } else if (keyword.includes("dress") || keyword.includes("dres")) {
         result.skus.push(dress);
-        return Promise.resolve({ result: result });
+        return Promise.resolve(result);
     }
     return $.get("http://13.67.88.182:8085/computeSimilarity", { text: keyword });
 };
