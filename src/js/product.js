@@ -59,9 +59,7 @@ const dress = ["SKU895177","SKU898702","SKU904195","SKU908490","SKU908507","SKU9
 const search = function(keywordOriginal) {
     let result = {};
     const keyword = keywordOriginal.toLowerCase();
-    console.log(keyword);
     if (keyword.includes("flower") && keyword.includes("dress") && keyword.includes("not black") && keyword.includes("no zips") && keyword.includes("sleeves")) {
-        console.log('innn');
         result.skus = long;
         return Promise.resolve(result);
     } else if (keyword.includes("no buttons") || keyword.includes("no zips") || keyword.includes("no sleeves")) {
@@ -111,14 +109,12 @@ $( document ).ready(function() {
         $('#searchProductMobile').val(keyword);
         search(keyword)
             .then((result) => {
-                console.log(result);
                 const skus = result.skus || [];
                 skus.forEach((sku, index) => {
                     searchItems[sku] = index;
                 });
                 return api('GET', '/product', { skus: result.skus || [], ...param },
                     (response) => {
-                        console.log(response);
                         const pages = Math.ceil(response.count / limit);
                         const products = response.rows;
                         products.sort((a, b) => searchItems[a.sku] - searchItems[b.sku]);
@@ -146,7 +142,6 @@ $( document ).ready(function() {
         return false;
     } else {
         api('GET', "/product", param, (response) => {
-            console.log(response);
             const pages = Math.ceil(response.count / limit);
             const products = response.rows;
             for(let i = 0; i < products.length; i++) {
