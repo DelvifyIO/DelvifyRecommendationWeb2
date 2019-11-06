@@ -92,7 +92,7 @@ const search = function(keywordOriginal) {
     //     result.skus = dress;
     //     return Promise.resolve(result);
     // }
-    return $.get("http://13.67.88.182:8085/computeSimilarity", { text: keywordOriginal });
+    return $.get("http://13.67.88.182:5001/computeSimilarity", { text: keywordOriginal });
 };
 
 
@@ -112,6 +112,7 @@ $( document ).ready(function() {
         $('#searchProductMobile').val(keyword);
         search(keyword)
             .then((result) => {
+                console.log(result)
                 const skus = result.skus || [];
                 skus.forEach((sku, index) => {
                     searchItems[sku] = index;
