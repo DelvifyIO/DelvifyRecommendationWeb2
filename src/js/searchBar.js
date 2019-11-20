@@ -32,7 +32,9 @@ $( document ).ready(function() {
         e.preventDefault();
         const keyword = $('#searchProduct').val();
         if (keyword) {
-            window.location.href = "product.html?keyword=" + keyword;
+            api('POST', `/query`, { query: keyword }, (result) => {
+                window.location.href = "product.html?keyword=" + keyword;
+            });
         }
         return false;
     });
@@ -41,7 +43,9 @@ $( document ).ready(function() {
         e.preventDefault();
         const keyword = $('#searchProductMobile').val();
         if (keyword) {
-            window.location.href = "product.html?keyword=" + keyword;
+            api('POST', `/query`, { query: keyword }, (result) => {
+                window.location.href = "product.html?keyword=" + keyword;
+            });
         }
         return false;
     });
