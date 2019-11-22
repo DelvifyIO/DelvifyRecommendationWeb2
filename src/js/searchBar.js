@@ -15,10 +15,22 @@ $( document ).ready(function() {
         '<span class="fs-20">Disable Delvify AI Search</span>' +
         '</button>';
 
+    const toggleOnSmall =
+        '<button class="flex-c-m color1 color0-hov trans-0-4 float-right" id="toggleSearchButton">' +
+        '<i class="fs-20 fa fa-toggle-on m-l-3 m-r-3" aria-hidden="true" />' +
+        '<span class="fs-15">Disable Delvify AI Search</span>' +
+        '</button>';
+
     const toggleOff =
         '<button class="flex-c-m colorwhite color0-hov trans-0-4 float-right" id="toggleSearchButton">' +
         '<i class="fs-30 fa fa-toggle-off m-l-3 m-r-3" aria-hidden="true" />' +
         '<span class="fs-20">Enable Delvify AI Search</span>' +
+        '</button>';
+
+    const toggleOffSmall =
+        '<button class="flex-c-m color1 color0-hov trans-0-4 float-right" id="toggleSearchButton">' +
+        '<i class="fs-20 fa fa-toggle-off m-l-3 m-r-3" aria-hidden="true" />' +
+        '<span class="fs-15">Enable Delvify AI Search</span>' +
         '</button>';
 
     $('#searchBar').append(
@@ -32,20 +44,23 @@ $( document ).ready(function() {
         '</div>'
     );
 
-    $('#searchBarMobile').append(
-        '<div class="search-product-mobile pos-relative of-hidden">' +
-        '<form id="searchFormMobile">' +
-        '<input class="s-text7 size6 p-l-23 p-r-50" type="text" name="search-product" id="searchProductMobile" placeholder="Search Products...">' +
-        '<button class="flex-c-m size5 ab-r-m color2 color0-hov trans-0-4" id="searchButtonMobile">' +
-        '<i class="fs-12 fa fa-search" aria-hidden="true" />' +
+    $('#searchBarSmall').append(
+        '<div class="search-product of-hidden bg-white">' +
+        '<form id="searchForm" class="d-flex flex-row align-items-center">' +
+        '<input class="fs-15 size4 p-l-25 p-r-25" type="text" name="search-product" id="searchProduct" placeholder="Search Products...">' +
+        '<button class="flex-c-m size8 color2 color0-hov trans-0-4" id="searchButton">' +
+        '<i class="fs-15 fa fa-search" aria-hidden="true" />' +
         '</button>' +
         '</form>' +
-        '</div>');
+        '</div>'
+    );
 
     if (enabledAI) {
         $('#searchBar').append(toggleOn);
+        $('#searchBarSmall').append(toggleOnSmall);
     } else {
         $('#searchBar').append(toggleOff);
+        $('#searchBarSmall').append(toggleOffSmall);
     }
 
 
@@ -67,17 +82,6 @@ $( document ).ready(function() {
         if (keyword) {
             api('POST', `/query`, { query: keyword }, (result) => {
                 window.location.href = "product.html?" + "ai=" + enabledAI +"&keyword=" + keyword;
-            });
-        }
-        return false;
-    });
-
-    $('#searchFormMobile').on('submit', function(e) {
-        e.preventDefault();
-        const keyword = $('#searchProductMobile').val();
-        if (keyword) {
-            api('POST', `/query`, { query: keyword }, (result) => {
-                window.location.href = "product.html?keyword=" + keyword;
             });
         }
         return false;
