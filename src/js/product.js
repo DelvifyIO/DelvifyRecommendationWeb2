@@ -59,46 +59,29 @@ const zips = ["SKU853410", "SKUA33400", "SKUA39265", "SKUA46233", "SKUA62285", "
 const long = ["SKU920791", "SKUB36075", "SKUB72460", "SKUB42173", "SKUB36442", "SKUB65105", "SKUB65106", "SKUB65107", "SKUB90023", "SKUB90034", "SKUB92225", "SKUC02371", "SKUB76918", "SKUB92214", "SKUB42159", "SKUB47872", "SKUB99443", "SKUB76989", "SKUB55194", "SKUC53026", "SKUB90418", "SKUC53068", "SKUC53372", "SKUC41156", "SKUC53391"];
 const dress = ["SKU895177","SKU898702","SKU904195","SKU908490","SKU908507","SKU911031","SKU911566","SKU920791","SKU920797","SKU922310","SKU922865","SKU945583","SKU972845","SKU986590","SKU986592","SKU993117","SKUA04028","SKUA06929","SKUA09638","SKUA07941","SKUA16542","SKUA18489","SKUA26304","SKUA27540","SKUA28349","SKUA42410","SKUA58280","SKUA55486","SKUA55487","SKU873031","SKU908047","SKU846369","SKUA51627","SKUA50320","SKUA45372","SKUA49778","SKUA36057","SKUA36369","SKUA55388","SKUA70803","SKUA69398","SKUA69881","SKUA62868","SKUA34918","SKUA70626","SKUA69367","SKUA69368","SKUA69399","SKUA68213","SKUA74760","SKUA74768","SKUA74275","SKUA71633","SKUA70589","SKUA72703","SKUA72704","SKUA73785","SKUA74151","SKUA68219","SKUA72705","SKUA73783","SKUA73784","SKUA73775","SKUA75073","SKUA75074","SKUA75784","SKUA75983","SKUA70599","SKUA70913","SKUA70973","SKUA71632","SKUA68144","SKUA68242","SKUB04630","SKUB04631","SKUB04632","SKUB10504","SKUB10540","SKUB10541","SKUB10555","SKUA59134","SKUA94311","SKUA94326","SKUA94343","SKUA94344","SKUA94348","SKUA97280","SKUA97655","SKUA97751","SKUA90983","SKUA92679","SKUA92684","SKUA92719","SKUA92725","SKUA81929","SKUA81930","SKUA81938","SKUA81947","SKUA81952","SKUA81953","SKUA81955","SKUA81956","SKUA83434","SKUA83454","SKUA83470","SKUA85111","SKUA85117","SKUA85118","SKUA85131","SKUA85145","SKUA85146","SKUA85155","SKUA85167","SKUA76761","SKUA76824","SKUA78659","SKUA79046","SKUB25153","SKUB25154","SKUB25170","SKUB25174","SKUB25175","SKUB25178","SKUB25179","SKUB25183","SKUB25185","SKUB25186","SKUB29879","SKUB36075","SKUB36433","SKUB72460","SKUB72516","SKUB77067","SKUB77068","SKUB25055","SKUB25135","SKUB25136","SKUB25140","SKUB25142","SKUB25145","SKUB65112","SKUB13846","SKUB13996","SKUA94301","SKUA95173","SKUA95178","SKUA95183","SKUA95212","SKUA95217","SKUA95223","SKUB56901","SKUB56909","SKUB56911","SKUA91496","SKUA91507","SKUA91524","SKUA91536","SKUA91543","SKUA91547","SKUA91550","SKUA91589","SKUA91605","SKUA91611","SKUA91650","SKUA92722","SKUB52303","SKUB52304","SKUB54000","SKUA85116","SKUB42110","SKUB42150","SKUB42154","SKUB42156","SKUB42168","SKUB42173","SKUB42186","SKUB40388","SKUB40389","SKUB40416","SKUB40417","SKUB40419","SKUB40439","SKUB40440","SKUB40456","SKUB36434","SKUB36442","SKUB36447","SKUB36500","SKUB36514","SKUB36625","SKU897807","SKUB13838","SKUB25051","SKUB25180","SKUB40387","SKUB52311","SKUB56469","SKUB56497","SKUB57565","SKUB57566","SKUB57567","SKUB65081","SKUB65087","SKUB65088","SKUB65105","SKUB65106","SKUB65107","SKUB76921","SKUB76925","SKUB76926","SKUB76940","SKUB76945","SKUB76947","SKUB76951","SKUB76956","SKUB76958","SKUB76959","SKUB83540","SKUB83561","SKUB90023","SKUB90029","SKUB90034","SKUB90041","SKUB90043","SKUB91774","SKUB92083","SKUB92106","SKUB92172","SKUB92225","SKUB92254","SKUB92583","SKUB92594","SKUB92600","SKUB92605","SKUB92607","SKUC02371","SKUC02409","SKUC02414","SKUC02415","SKUC02446","SKUC02510","SKUC03970","SKUB76917","SKUB76918","SKUB91755","SKUB92214","SKUB42159","SKUB83494","SKUB83495","SKUB42105","SKUB47973","SKUB83536",];
 
-const search = function(keywordOriginal) {
-    // let result = {};
-    // const keyword = keywordOriginal.toLowerCase();
-    // if (keyword.includes("flower") && keyword.includes("dress") && keyword.includes("not black") && keyword.includes("no zips") && keyword.includes("sleeves")) {
-    //     result.skus = long;
-    //     return Promise.resolve(result);
-    // } else if (keyword.includes("no buttons") || keyword.includes("no zips") || keyword.includes("no sleeves")) {
-    //     if (keyword.includes("no buttons")) {
-    //         result.skus = tshirt.filter(function(item) { return !buttons.includes(item) });
-    //     } else if (keyword.includes("no zips")) {
-    //         result.skus = tshirt.filter(function(item) { return !zips.includes(item) });
-    //     } else if (keyword.includes("no sleeves")) {
-    //         result.skus = nosleeves;
-    //     }
-    //     return Promise.resolve(result);
-    // } else if (keyword.includes("flower") ||
-    //     keyword.includes("floral")  || keyword.includes("flora") ||
-    //     keyword.includes("spring") ||
-    //     keyword.includes("flowery") ||
-    //     keyword.includes("colourful") || keyword.includes("colorful") || keyword.includes("colerful") ||
-    //     keyword.includes("summer")) {
-    //     result.skus = flower;
-    //     if (keyword.includes("spring")) {
-    //         result.skus = [...result.skus, ...spring];
-    //     }
-    //     if (keyword.includes("colourful") || keyword.includes("colorful") || keyword.includes("colerful")) {
-    //         result.skus = [...result.skus, ...colorful];
-    //     }
-    //     return Promise.resolve(result);
-    // } else if (keyword.includes("dress") || keyword.includes("dres")) {
-    //     result.skus = dress;
-    //     return Promise.resolve(result);
-    // }
-    return $.get("http://13.67.88.182:5001/computeSimilarity", { text: keywordOriginal });
+const search = function(keyword, enabledAI, param) {
+    return new Promise(function(resolve, reject) {
+        if (!enabledAI) {
+            api('GET', '/product/search', { keyword: keyword, ...param }, function (response) {
+                console.log('Disabled AI', response.rows.map((item) => item.sku));
+                resolve(response);
+            })
+        } else {
+            $.get("http://13.67.88.182:5001/computeSimilarity", { text: keyword }, function (result) {
+                console.log('Enabled AI', result.skus);
+                api('GET', '/product', {skus: result.skus || [], ...param}, function (response) {
+                    resolve(response);
+                })
+            });
+        }
+    })
 };
 
 
 $( document ).ready(function() {
 
     const limit = 15;
+    const enabledAI = getQuery()['ai'] === 'true' || false;
     const page = getQuery()['p'] || 1;
     const categoryId = getQuery()['category'] || null;
     const keyword = getQuery()['keyword'] || null;
@@ -110,39 +93,30 @@ $( document ).ready(function() {
     if (keyword) {
         $('#searchProduct').val(keyword);
         $('#searchProductMobile').val(keyword);
-        search(keyword)
-            .then((result) => {
-                console.log(result)
-                const skus = result.skus || [];
-                skus.forEach((sku, index) => {
-                    searchItems[sku] = index;
+        search(keyword, enabledAI, param)
+            .then((response) => {
+                const products = response.rows;
+                const pages = Math.ceil(response.count / limit);
+                for (let i = 0; i < products.length; i++) {
+                    const item = products[i];
+                    $('#productList').append(displayItem(item));
+                }
+                for (let i = 1; i <= pages; i++) {
+                    const keywordQuery = keyword ? `keyword=${keyword}&` : "";
+                    const aiQuery = keyword ? `ai=${enabledAI}&` : "";
+                    const href = (page == i) ? "javascript:void(0);" : ("product.html?" + aiQuery + keywordQuery + "p=" + i);
+                    $('#pagination').append(
+                        "<a href=\"" + href + "\" class=\"item-pagination flex-c-m trans-0-4" + ((page == i) ? " active-pagination\"" : "\"") + ">" + i + "</a>"
+                    )
+                }
+                addListener('wishlist');
+                $('.block2-btn-addcart').on('click', function () {
+                    const pid = $(this).data('pid');
+                    const item = products.find((t) => t.sku == pid);
+                    swal(item.name, "is added to cart !", "success");
+                    addToCart(item.sku, 1);
                 });
-                return api('GET', '/product', { skus: result.skus || [], ...param },
-                    (response) => {
-                        const pages = Math.ceil(response.count / limit);
-                        const products = response.rows;
-                        products.sort((a, b) => searchItems[a.sku] - searchItems[b.sku]);
-                        for(let i = 0; i < products.length; i++) {
-                            const item = products[i];
-                            $('#productList').append(displayItem(item));
-                        }
-                        for(let i = 1; i <= pages; i++) {
-                            const keywordQuery = keyword ? `keyword=${keyword}&` : "";
-                            const href = (page == i) ? "javascript:void(0);" : ("product.html?" + keywordQuery + "p=" + i);
-                            $('#pagination').append(
-                                "<a href=\"" + href + "\" class=\"item-pagination flex-c-m trans-0-4" + ((page == i) ? " active-pagination\"" : "\"") + ">" + i +"</a>"
-                            )
-                        }
-                        addListener('wishlist');
-                        $('.block2-btn-addcart').on('click', function(){
-                            const pid = $(this).data('pid');
-                            const item = products.find((t) => t.sku == pid);
-                            swal(item.name, "is added to cart !", "success");
-                            addToCart(item.sku, 1);
-                        });
-                })
             });
-
         return false;
     } else {
         api('GET', "/product", param, (response) => {
