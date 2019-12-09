@@ -96,6 +96,10 @@ $( document ).ready(function() {
         search(keyword, enabledAI, param)
             .then((response) => {
                 const products = response.rows;
+                if (products.length <= 0) {
+                    $('#productList').append("<h3 class='w-100 text-center m-2'>No results for: '" + keyword + "'</h3>");
+                    return;
+                }
                 const pages = Math.ceil(response.count / limit);
                 for (let i = 0; i < products.length; i++) {
                     const item = products[i];
