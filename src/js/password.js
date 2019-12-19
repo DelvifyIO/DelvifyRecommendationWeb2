@@ -1,11 +1,6 @@
-let password = "demo"; // because ANYONE CAN SEE THIS IN VIEW SOURCE!
-
-
 // Repeatedly prompt for user password until success:
 (function promptPass() {
-
-    let password = prompt("Enter your Password");
-
+    let password = window.localStorage.getItem('password') || prompt("Enter your Password");
     jQuery.ajax({
         type: 'GET',
         url: process.env.API_HOST + "/password",
@@ -14,6 +9,8 @@ let password = "demo"; // because ANYONE CAN SEE THIS IN VIEW SOURCE!
             if (result !== 'OK') {
                 alert("Incorrect Password");
                 return promptPass();
+            } else {
+                window.localStorage.setItem('password', password);
             };
         },
         error: function (result) {
