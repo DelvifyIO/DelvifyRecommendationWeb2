@@ -1,6 +1,6 @@
 // Repeatedly prompt for user password until success:
 (function promptPass() {
-    let password = window.localStorage.getItem('password') || prompt("Enter your Password");
+    let password = window.localStorage.getItem('fashionPassword') || prompt("Enter your Password");
     jQuery.ajax({
         type: 'GET',
         url: process.env.API_HOST + "/password",
@@ -8,10 +8,10 @@
         success: function (result) {
             if (result !== 'OK') {
                 alert("Incorrect Password");
-                window.localStorage.removeItem('password');
+                window.localStorage.removeItem('fashionPassword');
                 return promptPass();
             } else {
-                window.localStorage.setItem('password', password);
+                window.localStorage.setItem('fashionPassword', password);
             };
         },
         error: function (result) {
