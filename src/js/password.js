@@ -8,6 +8,7 @@
         success: function (result) {
             if (result !== 'OK') {
                 alert("Incorrect Password");
+                window.localStorage.removeItem('password');
                 return promptPass();
             } else {
                 window.localStorage.setItem('password', password);
