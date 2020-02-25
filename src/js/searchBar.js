@@ -36,7 +36,7 @@ $( document ).ready(function() {
         '</div> ' +
         '</div>' +
         '<div class="fs-25 size6 p-l-25 p-r-25 d-block w-100 d-flex align-items-center">' +
-        '<input type="text" name="search-product" id="searchProduct" placeholder="Search Products..." />' +
+        '<input class="w-100" type="text" name="search-product" id="searchProduct" placeholder="Search Products..." />' +
         '</div>' +
         '<button class="flex-c-m size5 color2 color0-hov trans-0-4 d-flex" type="button" id="uploadButton">' +
         '<i class="fs-20 fa fa-camera" aria-hidden="true" />' +
