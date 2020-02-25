@@ -3702,6 +3702,14 @@ SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE SHAPE
     width: 0;
 }
 
+.w-size-auto {
+    width: auto;
+}
+
+.w-size-max {
+    width: max-content;
+}
+
 /*[ Height Size ]
 ///////////////////////////////////////////////////////////
 */
