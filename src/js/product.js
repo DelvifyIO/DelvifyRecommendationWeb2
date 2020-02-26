@@ -154,8 +154,9 @@ $( document ).ready(function() {
                 }
                 for (let i = 1; i <= pages; i++) {
                     const keywordQuery = keyword ? `keyword=${keyword}&` : "";
-                    const aiQuery = keyword ? `ai=${enabledAI}&` : "";
-                    const href = (page == i) ? "javascript:void(0);" : ("product.html?" + aiQuery + keywordQuery + "p=" + i);
+                    const imageQuery = searchBy === 'image' && uploadedImage ? `searchBy=image&` : "";
+                    const aiQuery = keyword || (searchBy === 'image' && uploadedImage)? `ai=${enabledAI}&` : "";
+                    const href = (page == i) ? "javascript:void(0);" : ("product.html?" + aiQuery + keywordQuery + imageQuery + "p=" + i);
                     $('#pagination').append(
                         "<a href=\"" + href + "\" class=\"item-pagination flex-c-m trans-0-4" + ((page == i) ? " active-pagination\"" : "\"") + ">" + i + "</a>"
                     )
