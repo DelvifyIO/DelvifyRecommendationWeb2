@@ -1,5 +1,6 @@
 const API_HOST = process.env.API_HOST;
 const ALPHAVANTAGE_API_KEY = process.env.ALPHAVANTAGE_API_KEY;
+const merchantId = 'db_2';
 let uid = '';
 let geo_location = '';
 let device = '';
@@ -437,6 +438,20 @@ function getQuery()
     return vars;
 }
 
+function addQuery(url, queries = [])
+{
+    let newUrl = url;
+    const exist = url.includes('?');
+    newUrl += exist ? '&' : '?';
+    queries.forEach(function (query, index) {
+        newUrl += Object.keys(query)[0] + '=' + query[Object.keys(query)[0]];
+        if (index < queries.length - 1) {
+            newUrl += '&';
+        }
+    });
+    return newUrl.startsWith('/') ? newUrl.slice(1) : newUrl;
+}
+
 function setCookie(name, value, hours) {
     const d = new Date();
     d.setTime(d.getTime() + (hours * 60 * 60 * 1000));
@@ -472,7 +487,7 @@ function recordEngagement(type, options = {}) {
         location: options.location || getQuery()['location'],
         source: options.source || getQuery()['source'],
     };
-    if (type === 'ADD_CART_FROM_DETAIL' && !getQuery()['redirect_from_recommendation']) return;
+    if (type === 'ADD_CART_FROM_DETAIL' && !getQuery()['delvify_reco']) return;
     switch (type) {
         case 'WIDGET_IMPRESSION':
         case 'IMPRESSION':
@@ -500,27 +515,27 @@ function recordEngagement(type, options = {}) {
     }
 }
 
-function getRecommendations(placement, productDetailUrl, onAddToCart) {
+function getRecommendations(widget, config) {
     const sku = getQuery()["sku"] || 1;
-    const apiConfigs = {
-        HOME: { url: '/recommendation/featured', param: {}, source: 'FEATURED' },
-        PRODUCT_DETAILS: { url: `/recommendation/similar/${sku}`, param: {} , source: 'SIMILAR' },
-        PRODUCT_DETAILS_FEATURED: { url: '/recommendation/featured', param: {}, source: 'FEATURED' },
-        CART: { url: '/recommendation/cart', param: {}, source: 'FEATURED' }
-    };
-    const apiConfig = apiConfigs[placement.location];
-    recordEngagement('WIDGET_IMPRESSION', { location: placement.location });
-    api('GET', `${API_HOST}${apiConfig.url}`, { ...apiConfig.param, limit: placement.noOfItems }, function (response) {
-        let skus = response;
-        let items = [];
-        $(`#${placement.tagId}`).addClass("real-recommendation")
+    const { location, type, heading, tagId, noOfItems } = widget;
+    const { addToCartButton, currencies, themedColor, fontsize, fontFamily, gaUtmCode, affiliatePrefix } = config;
+    let url = {
+        TRENDING: '/recommendation/trending',
+        SIMILAR: `/recommendation/similar/${sku}`,
+        BEST_SELLING: '/recommendation/bestselling',
+        INVENTORY: '/recommendation/inventory',
+    }[type];
+    recordEngagement('WIDGET_IMPRESSION', { location: location });
+    api('GET', `${API_HOST}${url}`, { limit: noOfItems }, function (response) {
+        let items = response;
+        $(`#${tagId}`).addClass("real-recommendation")
         .addClass("animated")
         .append(
             styles +
             "<section class=\"bgwhite p-t-45 p-b-105\">" +
             "  <div class=\"container\">" +
             "    <div class=\"sec-title p-b-30\">" +
-            "      <h3 class=\"m-text5 t-center\">" + placement.heading + "</h3>" +
+            "      <h3 class=\"m-text5 t-center\">" + heading + "</h3>" +
             "    </div>" +
             "    <!-- Slide2-->" +
             "    <div class=\"wrap-slick2\">" +
@@ -531,8 +546,6 @@ function getRecommendations(placement, productDetailUrl, onAddToCart) {
             "          <h4 class=\"product-detail-name m-text16 p-b-13\" id=\"recommendedDetailsName\"></h4><span class=\"m-text17\" id=\"recommendedDetailsPrice\"></span>" +
             "          <p class=\"s-text8 p-t-10\" id=\"recommendedDetailsDescription\"></p>" +
             "          <div class=\"btn-recommended-addcart size9 trans-0-4 m-t-10 m-b-10\" id=\"btn-recommended-addcart\">" +
-            "            <!-- Button-->" +
-            "            <button class=\"flex-c-m sizefull bg1 bo-rad-23 hov1 s-text1 trans-0-4\">Add to Cart</button>" +
             "          </div>" +
             "          <div class=\"recommended-details-close\" id=\"recommendedDetailsClose\"><i class=\"fs-32 color1 fa fa-close\" aria-hidden=\"true\"></i></div>" +
             "        </div>" +
@@ -543,76 +556,71 @@ function getRecommendations(placement, productDetailUrl, onAddToCart) {
         );
 
         initSlick2();
-        const promises = skus.map((sku, index) => {
-            return new Promise((resolve, reject) => {
-                api('GET', `${API_HOST}/product`, {sku}, function (item) {
-                    item.source = apiConfigs[placement.location].source === 'FEATURED' ?
-                        index === 0 ? 'MOST_POPULAR' : index === 1 ? 'LEAST_POPULAR' :
-                            'CUSTOM' : 'SIMILAR';
-                    if (item.is_available && item.unit > 0) {
-                        recordEngagement('IMPRESSION', { pid: item.sku, location: placement.location, source: item.source });
-                        items.push(item);
+        items.forEach((item, index) => {
+            item.source = type;
+            recordEngagement('IMPRESSION', { pid: item.sku, location: location, source: type });
 
-                        $(`#${placement.tagId} #recommendedProducts`).append(
-                            "<div class=\"item-slick2 p-l-15 p-r-15\">" +
-                            "<div class=\"block2\">" +
-                            "<div class=\"block2-img wrap-pic-w of-hidden pos-relative\">" +
-                            "<a href=\"" + productDetailUrl({ pid: item.sku, location: placement.location, source: item.source }) + "\" class=\"recommended-product-image\" data-pid=\"" + item.sku + "\" data-source=\"" + item.source +"\">" +
-                            "<img src=\"" + item.images[0].url + "\" alt=\"IMG-PRODUCT\">" +
-                            "</a>" +
-                            "<a href=\"javascript:void(0);\" class=\"block2-btn-more\">" +
-                            "<div class=\"btn-more-ctn flex-c-m shadow1\" data-pid=\"" + item.sku + "\" >" +
-                            "<i class=\"fa fa-bars btn-more fs-16\" />" +
-                            "</div>" +
-                            "</a>" +
-                            "</div>" +
-                            "</div>" +
-                            "</div>");
-                    }
-                    resolve();
-                });
-            });
+            $(`#${tagId} #recommendedProducts`).append(
+                "<div class=\"item-slick2 p-l-15 p-r-15\">" +
+                "<div class=\"block2\">" +
+                "<div class=\"block2-img wrap-pic-w of-hidden pos-relative\">" +
+                "<a href=\"" + addQuery(item.product_url, [{ delvify_reco: true }, { location: location }, { source: type }]) + "\" class=\"recommended-product-image\" data-pid=\"" + item.sku + "\" data-source=\"" + item.source +"\">" +
+                "<img src=\"" + item.image_url + "\" alt=\"IMG-PRODUCT\">" +
+                "</a>" +
+                "<a href=\"javascript:void(0);\" class=\"block2-btn-more\">" +
+                "<div class=\"btn-more-ctn flex-c-m shadow1\" data-pid=\"" + item.sku + "\" >" +
+                "<i class=\"fa fa-bars btn-more fs-16\" />" +
+                "</div>" +
+                "</a>" +
+                "</div>" +
+                "</div>" +
+                "</div>");
         });
-        Promise.all(promises).then(() => {
-            $(`#${placement.tagId}>.slick2`).slick('unslick');
-            initSlick2(placement.tagId);
 
-            //On Detail Click
-            $(`#${placement.tagId} .btn-more-ctn`).click(function () {
-                const pid = $(this).data('pid');
-                const item = items.find((t) => t.sku == pid);
+        $(`#${tagId}>.slick2`).slick('unslick');
+        initSlick2(tagId);
 
-                $(`#${placement.tagId} #recommendedDetailsName`).text(item.name);
-                $(`#${placement.tagId} #recommendedDetailsPrice`).text(`${item.currency.sign}${item.price}`);
-                $(`#${placement.tagId} #recommendedDetailsDescription`).text(item.description);
-                $(`#${placement.tagId} #recommendedDetailsImage`).attr('src', item.images[0].url);
-                $(`#${placement.tagId} #recommendedDetails`).removeClass('d-none');
-                setTimeout(function () {
-                    $(`#${placement.tagId} #recommendedDetails`).addClass('flex-row').removeClass('w-size-0').removeClass('op-0-0').addClass('w-size-full');
-                }, 500);
+        //On Detail Click
+        $(`#${tagId} .btn-more-ctn`).click(function () {
+            const pid = $(this).data('pid');
+            const item = items.find((t) => t.sku == pid);
 
-                //On Add Cart
-                $(`#${placement.tagId} #btn-recommended-addcart`).unbind('click').on('click', function(){
-                    onAddToCart(pid);
-                    recordEngagement("ADD_CART_FROM_WIDGET", { pid: pid, location: placement.location, source: item.source });
-                });
-                recordEngagement("SHOW_OVERLAY", { pid: pid, location: placement.location, source: item.source });
-            });
+            $(`#${tagId} #recommendedDetailsName`).text(item.name);
+            $(`#${tagId} #recommendedDetailsPrice`).text(`$${item.price}`);
+            $(`#${tagId} #recommendedDetailsDescription`).text(item.description);
+            $(`#${tagId} #recommendedDetailsImage`).attr('src', item.image_url);
+            $(`#${tagId} #recommendedDetails`).removeClass('d-none');
+            setTimeout(function () {
+                $(`#${tagId} #recommendedDetails`).addClass('flex-row').removeClass('w-size-0').removeClass('op-0-0').addClass('w-size-full');
+            }, 500);
 
-            $(`#${placement.tagId} #recommendedDetailsClose`).click(function () {
-                $(`#${placement.tagId} #recommendedDetails`).removeClass('w-size-full').addClass('op-0-0').addClass('w-size-0').removeClass('flex-row');
-                setTimeout(function () {
-                    $(`#${placement.tagId} #recommendedDetails`).addClass('d-none');
-                }, 500);
-            });
+            //On Add Cart
+            // $(`#${tagId} #btn-recommended-addcart`).unbind('click').on('click', function(){
+            //     addToCartButton(pid);
+            //     recordEngagement("ADD_CART_FROM_WIDGET", { pid: pid, location: location, source: item.source });
+            // });
+            // recordEngagement("SHOW_OVERLAY", { pid: pid, location: location, source: item.source });
+        });
 
-            //On Product Click
-            $(`#${placement.tagId} .recommended-product-image`).click(function () {
-                const pid = $(this).data('pid');
-                const source = $(this).data('source');
-                recordEngagement("CLICK", { pid: pid, location: placement.location, source: source });
-            });
-        })
+        $(`#${tagId} #recommendedDetailsClose`).click(function () {
+            $(`#${tagId} #recommendedDetails`).removeClass('w-size-full').addClass('op-0-0').addClass('w-size-0').removeClass('flex-row');
+            setTimeout(function () {
+                $(`#${tagId} #recommendedDetails`).addClass('d-none');
+            }, 500);
+        });
+
+        //On Product Click
+        $(`#${tagId} .recommended-product-image`).click(function () {
+            const pid = $(this).data('pid');
+            const source = $(this).data('source');
+            recordEngagement("CLICK", { pid: pid, location: location, source: source });
+        });
+
+        if (addToCartButton) {
+            $(`#${tagId} #btn-recommended-addcart`).append(
+                "<button class=\"flex-c-m sizefull bg1 bo-rad-23 hov1 s-text1 trans-0-4\">Add to Cart</button>"
+            )
+        }
     });
 }
 
@@ -641,7 +649,9 @@ const deviceDetector = (function ()
 function api(method = 'GET', url = '', param = {}, onSuccess) {
     const { id, verbal = false, ...params } = param;
     if (id) {
-        url = url + `/${id}`;
+        url = url + `/${id}` + `?merchantid=${merchantId}`;
+    } else {
+        url = url + `?merchantid=${merchantId}`;
     }
     $.ajax({
         type: method,
@@ -649,23 +659,21 @@ function api(method = 'GET', url = '', param = {}, onSuccess) {
         data: params,
         success: onSuccess,
         headers:{
-            merchantid: 'db2',
+            merchantid: merchantId,
         }
     });
 }
 
 window.onload = function () {
     let config = {
-        placements: [],
-        productDetailUrl: function ({ pid, location, source }) {
-            return `product-details.html?sku=${pid}&redirect_from_recommendation=true&location=${location}&source=${source}`;
-        },
-        onAddToCart: function (sku) {
-            var nameProduct = $('#recommendedDetailsName').html();
-            swal(nameProduct, "is added to cart !", "success");
-            addToCart(sku, 1);
-        },
-        featuredItems: [],
+        widgets: [], //location, type, heading, tagId, noOfItems
+        addToCartButton: null,
+        currencies: [],
+        themedColor: "",
+        fontSize: null,
+        fontFamily: "",
+        gaUtmCode: "",
+        affiliatePrefix: "",
     };
     const rra = getCookie('rra');
     if (!rra) {
@@ -680,20 +688,11 @@ window.onload = function () {
         .always((res) => {
             geo_location = res.country;
             api('GET', `${API_HOST}/config`, {}, (res) => {
-                    config = {...config, ...res};
-                    config.placements = config.placements.map(function (placement) {return {
-                        ...placement,
-                        tagId: placement.location === 'HOME' ? 'homePageRecommendation' :
-                            placement.location === 'PRODUCT_DETAILS' ? 'productDetailsRecommendation' :
-                                placement.location === 'PRODUCT_DETAILS_FEATURED' ? 'productDetailsFeatured' :
-                                    placement.location === 'CART' ? 'cartRecommendation' : '',
-                    }});
-                    config.placements.forEach( function (placement) {
-                        if ($(`#${placement.tagId}`).length === 1) {
-                            getRecommendations(placement, config.productDetailUrl, config.onAddToCart);
-                        }
-                    })
-                });
+                config = {...config, ...res};
+                config.widgets.forEach( function (widget) {
+                    getRecommendations(widget, config);
+                })
+            });
         });
 };
 

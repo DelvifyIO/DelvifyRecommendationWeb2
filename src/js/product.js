@@ -18,7 +18,7 @@ function displayItem(item) {
         "<div class=\"col-sm-12 col-md-6 col-lg-4 p-b-50\">" +
         "<div class=\"block2\">" +
         "<div class=\"block2-img wrap-pic-w of-hidden pos-relative\">" +
-        "<img src=\""+ item.images[0].url +"\" alt=\"IMG-PRODUCT\">" +
+        "<img src=\""+ item.image_url +"\" alt=\"IMG-PRODUCT\">" +
         "<div class=\"block2-overlay trans-0-4\">" +
         "<a href=\"#\" class=\"block2-btn-addwishlist hov-pointer trans-0-4\">" +
         "<i class=\"icon-wishlist icon_heart_alt\" aria-hidden=\"true\"></i>" +
@@ -41,7 +41,7 @@ function displayItem(item) {
         item.name +
         "</a>" +
         "<span class=\"block2-price m-text6 p-r-5\">" +
-        `${item.currency.sign}${item.price}` +
+        `$${item.price}` +
         "</span>" +
         "</div>" +
         "</div>" +

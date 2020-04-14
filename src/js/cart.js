@@ -12,16 +12,16 @@ $( document ).ready(function() {
                         "<tr class=\"table-row\" id=\"table-row-" + sku + "\">" +
                         "<td class=\"column-1\">" +
                         "<div class=\"cart-img-product b-rad-4 o-f-hidden\" data-pid=\"" + item.sku + "\">" +
-                        "<img src=\"" + item.images[0].url200 + "\" alt=\"IMG-PRODUCT\">" +
+                        "<img src=\"" + item.image_url + "\" alt=\"IMG-PRODUCT\">" +
                         "</div>" +
                         "</td>" +
                         "<td class=\"column-2\">" + item.name + "</td>" +
-                        "<td class=\"column-3\"><span>" + item.currency.sign + "</span><span class='item-price'>" + item.price + "</span></td>" +
+                        "<td class=\"column-3\"><span>$</span><span class='item-price'>" + item.price + "</span></td>" +
                         "<td class=\"column-4 t-center\">" + quantity + "</td>" +
-                        "<td class=\"column-5\"><span>" + item.currency.sign + "</span><span class='item-total-price'>" + item.price * quantity + "</span></td>" +
+                        "<td class=\"column-5\"><span>$</span><span class='item-total-price'>" + item.price * quantity + "</span></td>" +
                         "</tr>");
                     total += item.price * quantity;
-                    currencySign = item.currency.sign;
+                    currencySign = "$";
                     resolve();
                 });
             });
@@ -48,7 +48,7 @@ $( document ).ready(function() {
         const getItems = cart.items.map(function ({ sku, quantity }) {
             return new Promise((resolve, reject) => {
                 api('GET', '/product', { sku }, (item) => {
-                    items.push({ pid: item.sku, quantity, currency: item.currency.name, price: item.price });
+                    items.push({ pid: item.sku, quantity, currency: item.currency, price: item.price });
                     resolve();
                 });
             });

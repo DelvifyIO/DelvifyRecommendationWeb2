@@ -48,11 +48,8 @@ block content
                     .dropdown-content.dis-none.p-t-15.p-b-23
                         p.s-text8#productReviews
     // Relate Product
-    #productDetailsRecommendation
-    // Featured Product
-    #productDetailsFeatured
+    .delvifyRecommendationWidget#delvifyRecommendationSimilar(data-location="PRODUCT_PAGE", data-source="SIMILAR")
 
 block scripts
     script(src="../dist/searchBar.bundle.js")
     script(src="../dist/productDetails.bundle.js")
-    script(src="http://localhost:8081/api/js?merchantid=db2")

@@ -4,18 +4,16 @@ $( document ).ready(function() {
 
     api('GET', `/product`, { sku }, (item) => {
         $('#productName').text(item.name);
-        $('#productPrice').text(`${item.currency.sign}${item.price}`);
+        $('#productPrice').text(`$${item.price}`);
         $('#productDescription').text(item.description);
         $('#productSKU').text(`SKU: ${item.sku}`);
         $('#productCategories').text(`Categories: ${item.category.name}`);
-        item.images.forEach((image) => {
-            $('#productSlide').append(
-                "<div class=\"item-slick3\" data-thumb=\"" + image.url + "\">" +
-                "<div class=\"wrap-pic-w\">" +
-                "<img src=\"" + image.url + "\" alt=\"IMG-PRODUCT\">" +
-                "</div>" +
-                "</div>");
-        });
+        $('#productSlide').append(
+            "<div class=\"item-slick3\" data-thumb=\"" + item.image_url + "\">" +
+            "<div class=\"wrap-pic-w\">" +
+            "<img src=\"" + item.image_url + "\" alt=\"IMG-PRODUCT\">" +
+            "</div>" +
+            "</div>");
         $('.slick3').slick('unslick');
         initSlick3();
         $('#addToCartBtn').on('click', function(){
