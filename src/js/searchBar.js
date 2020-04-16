@@ -6,9 +6,10 @@ $( document ).ready(function() {
     const getMicrophonePermission = () => {
         return new Promise((resolve, reject) => {
             navigator.permissions.query({ name:'microphone' }).then(function(result) {
-                console.log(result.state);
                 if (result.state == 'granted') {
                     return resolve();
+                } else if (result.state == 'prompt') {
+                    return reject('No permission');
                 } else if (result.state == 'denied') {
                     return reject('No permission');
                 }
@@ -198,8 +199,8 @@ $( document ).ready(function() {
     let recorder, stream, context, input;
     $('#recordButton').on('click', function(e) {
         e.preventDefault();
-        // getMicrophonePermission()
-        //     .then(() => {
+        getMicrophonePermission()
+            .then(() => {
                 recordingState = 'recording';
                 updateRecordButtons();
                 navigator.mediaDevices.getUserMedia({ audio: true, video: false })
@@ -213,8 +214,8 @@ $( document ).ready(function() {
                         });
                         //start the recording process
                         recorder.record();
-                    })
-            // })
+                    });
+            })
             .catch((err) => {
                 console.log(err);
             });
