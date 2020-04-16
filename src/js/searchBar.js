@@ -1,6 +1,25 @@
 $( document ).ready(function() {
     let enabledAI = getQuery()['ai'] === 'true' || false;
     let loading = false;
+    let recordingState = 'idle'; // ['idle', 'recording', 'stopped', 'loading']
+
+    const getMicrophonePermission = () => {
+        return new Promise((resolve, reject) => {
+            navigator.permissions.query({ name:'microphone' }).then(function(result) {
+                if (result.state == 'granted') {
+                    return resolve();
+                } else if (result.state == 'prompt') {
+                    return reject('No permission');
+                } else if (result.state == 'denied') {
+                    return reject('No permission');
+                }
+                result.onchange = function(res) {
+                    console.log('onchange', res);
+                    return resolve(res);
+                };
+            });
+        });
+    };
 
     const toggleOn =
         '<button class="flex-c-m colorwhite color0-hov trans-0-4 float-right" id="toggleSearchButton">' +
@@ -38,6 +57,12 @@ $( document ).ready(function() {
         '<div class="fs-25 size6 p-l-25 p-r-25 d-block w-100 d-flex align-items-center">' +
         '<input class="w-100" type="text" name="search-product" id="searchProduct" placeholder="Search Products..." />' +
         '</div>' +
+        '<button class="flex-c-m size5 color2 color0-hov trans-0-4 d-flex" type="button" id="playButton">' +
+        '<i class="fs-20 fa fa-play" aria-hidden="true" />' +
+        '</button>' +
+        '<button class="flex-c-m size5 color2 color0-hov trans-0-4 d-flex" type="button" id="stopButton">' +
+        '<i class="fs-20 fa fa-stop" aria-hidden="true" />' +
+        '</button>' +
         '<button class="flex-c-m size5 color2 color0-hov trans-0-4 d-flex" type="button" id="recordButton">' +
         '<i class="fs-20 fa fa-microphone" aria-hidden="true" />' +
         '</button>' +
@@ -47,11 +72,11 @@ $( document ).ready(function() {
         '<div class="flex-c-m size5 color2 trans-0-4 d-none" id="uploadSpinner">' +
         '<i class="fa fa-spinner fa-spin" aria-hidden="true" />' +
         '</div>' +
-        '<input type="file" id="uploadInput" accept="image/*" hidden/>' +
-        '<input type="file" id="uploadWavInput" accept=".wav" hidden/>' +
         '<button class="flex-c-m size5 color2 color0-hov trans-0-4" type="submit" id="searchButton">' +
         '<i class="fs-20 fa fa-search" aria-hidden="true" />' +
         '</button>' +
+        '<input type="file" id="uploadInput" accept="image/*" hidden/>' +
+        '<audio id="player" hidden></audio>' +
         '</form>' +
         '</div>'
     );
@@ -66,6 +91,12 @@ $( document ).ready(function() {
         '<span class="fs-10" id="uploadedImageName"></span>' +
         '</div> ' +
         '</div>' +
+        '<button class="flex-c-m size8 color2 color0-hov trans-0-4 d-flex" type="button" id="playButton">' +
+        '<i class="fs-15 fa fa-play" aria-hidden="true" />' +
+        '</button>' +
+        '<button class="flex-c-m size8 color2 color0-hov trans-0-4 d-flex" type="button" id="stopButton">' +
+        '<i class="fs-15 fa fa-stop" aria-hidden="true" />' +
+        '</button>' +
         '<button class="flex-c-m size8 color2 color0-hov trans-0-4 d-flex" type="button" id="recordButton">' +
         '<i class="fs-15 fa fa-microphone" aria-hidden="true" />' +
         '</button>' +
@@ -76,7 +107,7 @@ $( document ).ready(function() {
         '<i class="fa fa-spinner fa-spin" aria-hidden="true" />' +
         '</div>' +
         '<input type="file" id="uploadInput" accept="image/*" hidden/>' +
-        '<input type="file" id="uploadWavInput" accept=".wav" hidden/>' +
+        '<audio id="player" hidden></audio>' +
         '<button class="flex-c-m size8 color2 color0-hov trans-0-4" id="searchButton">' +
         '<i class="fs-15 fa fa-search" aria-hidden="true" />' +
         '</button>' +
@@ -84,18 +115,52 @@ $( document ).ready(function() {
         '</div>'
     );
 
+    const updateRecordButtons = () => {
+        if (enabledAI) {
+            switch (recordingState) {
+                case 'idle':
+                    $('#recordButton').removeClass('d-none').addClass('d-flex');
+                    $('#playButton').removeClass('d-flex').addClass('d-none');
+                    $('#stopButton').removeClass('d-flex').addClass('d-none');
+                    $('#uploadSpinner').removeClass('d-flex').addClass('d-none');
+                    break;
+                case 'recording':
+                    $('#stopButton').removeClass('d-none').addClass('d-flex');
+                    $('#recordButton').removeClass('d-flex').addClass('d-none');
+                    $('#playButton').removeClass('d-flex').addClass('d-none');
+                    $('#uploadSpinner').removeClass('d-flex').addClass('d-none');
+                    break;
+                case 'stopped':
+                    $('#playButton').removeClass('d-none').addClass('d-flex');
+                    $('#recordButton').removeClass('d-none').addClass('d-flex');
+                    $('#stopButton').removeClass('d-flex').addClass('d-none');
+                    $('#uploadSpinner').removeClass('d-flex').addClass('d-none');
+                    break;
+                case 'loading':
+                    $('#uploadSpinner').removeClass('d-none').addClass('d-flex');
+                    $('#playButton').removeClass('d-none').addClass('d-flex');
+                    $('#stopButton').removeClass('d-flex').addClass('d-none');
+                    $('#recordButton').removeClass('d-flex').addClass('d-none');
+                    break;
+            }
+        } else {
+            $('#recordButton').removeClass('d-flex').addClass('d-none');
+            $('#playButton').removeClass('d-flex').addClass('d-none');
+            $('#stopButton').removeClass('d-flex').addClass('d-none');
+        }
+    };
+
     if (enabledAI) {
         $('#searchBar').append(toggleOn);
         $('#searchBarSmall').append(toggleOnSmall);
         $('#uploadButton').removeClass('d-none').addClass('d-flex');
-        $('#recordButton').removeClass('d-none').addClass('d-flex');
+        updateRecordButtons();
     } else {
         $('#searchBar').append(toggleOff);
         $('#searchBarSmall').append(toggleOffSmall);
         $('#uploadButton').removeClass('d-flex').addClass('d-none');
-        $('#recordButton').removeClass('d-flex').addClass('d-none');
+        updateRecordButtons();
     }
-
 
     $('#toggleSearchButton').on('click', function(e) {
         if ($(this).find("i").hasClass("fa-toggle-on")) {
@@ -103,14 +168,14 @@ $( document ).ready(function() {
             $(this).find("i").removeClass("fa-toggle-on").addClass("fa-toggle-off");
             $(this).find("span").text("Enable Delvify AI Search");
             $('#uploadButton').removeClass('d-flex').addClass('d-none');
-            $('#recordButton').removeClass('d-flex').addClass('d-none');
+            updateRecordButtons();
         } else {
             enabledAI = true;
             $(this).find("i").removeClass("fa-toggle-off").addClass("fa-toggle-on");
             $(this).find("span").text("Disable Delvify AI Search");
             if (!loading) {
                 $('#uploadButton').removeClass('d-none').addClass('d-flex');
-                $('#recordButton').removeClass('d-none').addClass('d-flex');
+                updateRecordButtons();
             }
         }
     });
@@ -130,10 +195,66 @@ $( document ).ready(function() {
         return false;
     });
 
+    let AudioContext = window.AudioContext || window.webkitAudioContext;
+    let recorder, stream, context, input;
     $('#recordButton').on('click', function(e) {
         e.preventDefault();
-        $('#uploadWavInput').click();
+        getMicrophonePermission()
+            .then(() => {
+                recordingState = 'recording';
+                updateRecordButtons();
+                navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                    .then(function(s) {
+                        stream = s;
+                        context = new AudioContext;
+                        input = context.createMediaStreamSource(stream);
+                        /* Create the Recorder object and configure to record mono sound (1 channel) Recording 2 channels will double the file size */
+                        recorder = new Recorder(input, {
+                            numChannels: 1
+                        });
+                        //start the recording process
+                        recorder.record();
+                    });
+            })
+            .catch((err) => {
+                console.log(err);
+            });
         return false;
+    });
+
+    $('#stopButton').on('click', function() {
+        if (recorder) {
+            recorder.stop(); //stop microphone access
+            stream.getAudioTracks()[0].stop();
+            recorder.exportWAV((data) => {
+                recordingState = 'loading';
+                $('#searchProduct').attr('placeholder', 'Sound recognizing...');
+                updateRecordButtons();
+
+                const file = new File([data], 'recording.wav');
+                $('#player').attr('src', URL.createObjectURL(data));
+                let formData = new FormData();
+                formData.append('audio', file);
+
+                let req = new XMLHttpRequest();
+
+                req.onreadystatechange = function(e) {
+                    if (req.readyState == 4 && req.status == 200) {
+                        recordingState = 'stopped';
+                        updateRecordButtons();
+                        console.log('Sound recognized: ', req.responseText);
+                        $('#searchProduct').val(req.responseText);
+                        $('#searchProduct').attr('placeholder', 'Search Products...');
+                    }
+                };
+                req.open("POST", 'http://18.162.113.148:3005/deepinfer');
+                req.send(formData);
+            })
+        }
+    });
+
+    $('#playButton').on('click', function() {
+        $('#player').trigger('play');
     });
 
     $('#uploadInput').on('change', function(e) {
@@ -156,39 +277,6 @@ $( document ).ready(function() {
                 window.location.href = "product.html?" + "ai=" + enabledAI +"&searchBy=image";
             };
             reader.readAsDataURL(file);
-        }
-    });
-
-    $('#uploadWavInput').on('change', function(e) {
-        if ($(this).prop('files').length > 0) {
-            loading = true;
-            $('#uploadButton').removeClass('d-flex').addClass('d-none');
-            $('#recordButton').removeClass('d-flex').addClass('d-none');
-            $('#searchButton').removeClass('d-flex').addClass('d-none');
-            $('#uploadSpinner').removeClass('d-none').addClass('d-flex');
-            $('#searchProduct').removeClass('d-block').addClass('d-none');
-            $('#uploadedImageContainer').removeClass('d-none').addClass('d-flex');
-            const file = $(this).prop('files')[0];
-            $('#uploadedImage').prop('src', '../images/icons/wav.svg');
-            $('#uploadedImageName').html(`${file.name} ‧ ${(file.size/1024).toFixed(2)}KB`);
-
-            let formData = new FormData();
-            formData.append('audio', file);
-            let req = new XMLHttpRequest();
-
-            req.onreadystatechange = function(e) {
-                if (req.readyState == 4 && req.status == 200) {
-                    $('#uploadButton').removeClass('d-none').addClass('d-flex');
-                    $('#recordButton').removeClass('d-none').addClass('d-flex');
-                    $('#searchButton').removeClass('d-none').addClass('d-flex');
-                    $('#uploadSpinner').removeClass('d-flex').addClass('d-none');
-                    $('#searchProduct').removeClass('d-none').addClass('d-block');
-                    alert(req.responseText);
-                }
-            };
-
-            req.open("POST", 'http://18.162.113.148:3005/deepinfer');
-            req.send(formData);
         }
     });
 
