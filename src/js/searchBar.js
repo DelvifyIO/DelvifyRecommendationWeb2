@@ -9,8 +9,6 @@ $( document ).ready(function() {
                 console.log(result.state);
                 if (result.state == 'granted') {
                     return resolve();
-                } else if (result.state == 'prompt') {
-                    return reject('No permission');
                 } else if (result.state == 'denied') {
                     return reject('No permission');
                 }
