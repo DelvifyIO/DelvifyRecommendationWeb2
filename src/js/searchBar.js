@@ -6,15 +6,17 @@ $( document ).ready(function() {
     const getMicrophonePermission = () => {
         return new Promise((resolve, reject) => {
             navigator.permissions.query({ name:'microphone' }).then(function(result) {
-                console.log(result.state);
                 if (result.state == 'granted') {
                     return resolve();
                 } else if (result.state == 'denied') {
                     return reject('No permission');
                 }
-                result.onchange = function(res) {
-                    console.log('onchange', res);
-                    return resolve(res);
+                result.onchange = function(e) {
+                    if (e.isTrusted) {
+                        return resolve();
+                    } else {
+                        return reject('No permission');
+                    }
                 };
             });
         });
