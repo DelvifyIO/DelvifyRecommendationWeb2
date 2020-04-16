@@ -8,8 +8,6 @@ $( document ).ready(function() {
             navigator.permissions.query({ name:'microphone' }).then(function(result) {
                 if (result.state == 'granted') {
                     return resolve();
-                } else if (result.state == 'prompt') {
-                    return reject('No permission');
                 } else if (result.state == 'denied') {
                     return reject('No permission');
                 }
