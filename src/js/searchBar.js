@@ -38,6 +38,9 @@ $( document ).ready(function() {
         '<div class="fs-25 size6 p-l-25 p-r-25 d-block w-100 d-flex align-items-center">' +
         '<input class="w-100" type="text" name="search-product" id="searchProduct" placeholder="Search Products..." />' +
         '</div>' +
+        '<button class="flex-c-m size5 color2 color0-hov trans-0-4 d-flex" type="button" id="recordButton">' +
+        '<i class="fs-20 fa fa-microphone" aria-hidden="true" />' +
+        '</button>' +
         '<button class="flex-c-m size5 color2 color0-hov trans-0-4 d-flex" type="button" id="uploadButton">' +
         '<i class="fs-20 fa fa-camera" aria-hidden="true" />' +
         '</button>' +
@@ -45,6 +48,7 @@ $( document ).ready(function() {
         '<i class="fa fa-spinner fa-spin" aria-hidden="true" />' +
         '</div>' +
         '<input type="file" id="uploadInput" accept="image/*" hidden/>' +
+        '<input type="file" id="uploadWavInput" accept=".wav" hidden/>' +
         '<button class="flex-c-m size5 color2 color0-hov trans-0-4" type="submit" id="searchButton">' +
         '<i class="fs-20 fa fa-search" aria-hidden="true" />' +
         '</button>' +
@@ -62,6 +66,9 @@ $( document ).ready(function() {
         '<span class="fs-10" id="uploadedImageName"></span>' +
         '</div> ' +
         '</div>' +
+        '<button class="flex-c-m size8 color2 color0-hov trans-0-4 d-flex" type="button" id="recordButton">' +
+        '<i class="fs-15 fa fa-microphone" aria-hidden="true" />' +
+        '</button>' +
         '<button class="flex-c-m size8 color2 color0-hov trans-0-4 d-flex" type="button" id="uploadButton">' +
         '<i class="fs-15 fa fa-camera" aria-hidden="true" />' +
         '</button>' +
@@ -69,6 +76,7 @@ $( document ).ready(function() {
         '<i class="fa fa-spinner fa-spin" aria-hidden="true" />' +
         '</div>' +
         '<input type="file" id="uploadInput" accept="image/*" hidden/>' +
+        '<input type="file" id="uploadWavInput" accept=".wav" hidden/>' +
         '<button class="flex-c-m size8 color2 color0-hov trans-0-4" id="searchButton">' +
         '<i class="fs-15 fa fa-search" aria-hidden="true" />' +
         '</button>' +
@@ -80,10 +88,12 @@ $( document ).ready(function() {
         $('#searchBar').append(toggleOn);
         $('#searchBarSmall').append(toggleOnSmall);
         $('#uploadButton').removeClass('d-none').addClass('d-flex');
+        $('#recordButton').removeClass('d-none').addClass('d-flex');
     } else {
         $('#searchBar').append(toggleOff);
         $('#searchBarSmall').append(toggleOffSmall);
         $('#uploadButton').removeClass('d-flex').addClass('d-none');
+        $('#recordButton').removeClass('d-flex').addClass('d-none');
     }
 
 
@@ -93,12 +103,14 @@ $( document ).ready(function() {
             $(this).find("i").removeClass("fa-toggle-on").addClass("fa-toggle-off");
             $(this).find("span").text("Enable Delvify AI Search");
             $('#uploadButton').removeClass('d-flex').addClass('d-none');
+            $('#recordButton').removeClass('d-flex').addClass('d-none');
         } else {
             enabledAI = true;
             $(this).find("i").removeClass("fa-toggle-off").addClass("fa-toggle-on");
             $(this).find("span").text("Disable Delvify AI Search");
             if (!loading) {
                 $('#uploadButton').removeClass('d-none').addClass('d-flex');
+                $('#recordButton').removeClass('d-none').addClass('d-flex');
             }
         }
     });
@@ -118,10 +130,17 @@ $( document ).ready(function() {
         return false;
     });
 
+    $('#recordButton').on('click', function(e) {
+        e.preventDefault();
+        $('#uploadWavInput').click();
+        return false;
+    });
+
     $('#uploadInput').on('change', function(e) {
         if ($(this).prop('files').length > 0) {
             loading = true;
             $('#uploadButton').removeClass('d-flex').addClass('d-none');
+            $('#recordButton').removeClass('d-flex').addClass('d-none');
             $('#searchButton').removeClass('d-flex').addClass('d-none');
             $('#uploadSpinner').removeClass('d-none').addClass('d-flex');
             $('#searchProduct').removeClass('d-block').addClass('d-none');
@@ -137,6 +156,39 @@ $( document ).ready(function() {
                 window.location.href = "product.html?" + "ai=" + enabledAI +"&searchBy=image";
             };
             reader.readAsDataURL(file);
+        }
+    });
+
+    $('#uploadWavInput').on('change', function(e) {
+        if ($(this).prop('files').length > 0) {
+            loading = true;
+            $('#uploadButton').removeClass('d-flex').addClass('d-none');
+            $('#recordButton').removeClass('d-flex').addClass('d-none');
+            $('#searchButton').removeClass('d-flex').addClass('d-none');
+            $('#uploadSpinner').removeClass('d-none').addClass('d-flex');
+            $('#searchProduct').removeClass('d-block').addClass('d-none');
+            $('#uploadedImageContainer').removeClass('d-none').addClass('d-flex');
+            const file = $(this).prop('files')[0];
+            $('#uploadedImage').prop('src', '../images/icons/wav.svg');
+            $('#uploadedImageName').html(`${file.name} ‧ ${(file.size/1024).toFixed(2)}KB`);
+
+            let formData = new FormData();
+            formData.append('audio', file);
+            let req = new XMLHttpRequest();
+
+            req.onreadystatechange = function(e) {
+                if (req.readyState == 4 && req.status == 200) {
+                    $('#uploadButton').removeClass('d-none').addClass('d-flex');
+                    $('#recordButton').removeClass('d-none').addClass('d-flex');
+                    $('#searchButton').removeClass('d-none').addClass('d-flex');
+                    $('#uploadSpinner').removeClass('d-flex').addClass('d-none');
+                    $('#searchProduct').removeClass('d-none').addClass('d-block');
+                    alert(req.responseText);
+                }
+            };
+
+            req.open("POST", 'http://18.162.113.148:3005/deepinfer');
+            req.send(formData);
         }
     });
 

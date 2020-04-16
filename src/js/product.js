@@ -122,6 +122,7 @@ $( document ).ready(function() {
     if (keyword || (searchBy === 'image' && uploadedImage)) {
         if (searchBy === 'image' && uploadedImage) {
             $('#uploadButton').removeClass('d-flex').addClass('d-none');
+            $('#recordButton').removeClass('d-flex').addClass('d-none');
             $('#searchButton').removeClass('d-flex').addClass('d-none');
             $('#uploadSpinner').removeClass('d-none').addClass('d-flex');
             $('#uploadedImageContainer').removeClass('d-none').addClass('d-flex');
@@ -135,6 +136,7 @@ $( document ).ready(function() {
         search(keyword, uploadedImage, enabledAI, param, searchBy)
             .then((response) => {
                 $('#uploadButton').removeClass('d-none').addClass('d-flex');
+                $('#recordButton').removeClass('d-none').addClass('d-flex');
                 $('#searchButton').removeClass('d-none').addClass('d-flex');
                 $('#uploadSpinner').removeClass('d-flex').addClass('d-none');
                 $('#searchProduct').removeClass('d-none').addClass('d-block');
