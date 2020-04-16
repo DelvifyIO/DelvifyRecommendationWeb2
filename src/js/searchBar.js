@@ -9,7 +9,12 @@ $( document ).ready(function() {
                 console.log(result.state);
                 if (result.state == 'granted') {
                     return resolve();
-                } else if (result.state == 'denied') {
+                } else if (result.state == 'prompt') {
+                    navigator.getUserMedia({ audio: true }, () => {
+                        return resolve();
+                    }, () => { return reject(); });
+                }
+                else if (result.state == 'denied') {
                     return reject('No permission');
                 }
                 result.onchange = function(e) {
