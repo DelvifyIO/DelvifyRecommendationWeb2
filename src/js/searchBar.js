@@ -6,6 +6,7 @@ $( document ).ready(function() {
     const getMicrophonePermission = () => {
         return new Promise((resolve, reject) => {
             navigator.permissions.query({ name:'microphone' }).then(function(result) {
+                console.log(result.state);
                 if (result.state == 'granted') {
                     return resolve();
                 } else if (result.state == 'denied') {
