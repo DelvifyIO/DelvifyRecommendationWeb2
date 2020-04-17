@@ -213,7 +213,9 @@ $( document ).ready(function() {
                 navigator.mediaDevices.getUserMedia({ audio: true, video: false })
                     .then(function(s) {
                         stream = s;
-                        context = new AudioContext;
+                        context = new AudioContext({
+                            sampleRate: 16000,
+                        });
                         input = context.createMediaStreamSource(stream);
                         /* Create the Recorder object and configure to record mono sound (1 channel) Recording 2 channels will double the file size */
                         recorder = new Recorder(input, {
