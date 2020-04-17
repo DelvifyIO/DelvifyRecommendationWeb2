@@ -68,16 +68,14 @@ const search = function(keyword, uploadedImage, enabledAI, param, searchBy) {
                     const file = new File([blob], uploadedImage.name);
 
                     let formData = new FormData();
-                    formData.append('file', file);
+                    formData.append('image', file);
 
                     let req = new XMLHttpRequest();
 
                     req.onreadystatechange = function(e) {
                         if (req.readyState == 4 && req.status == 200) {
                             const result = JSON.parse(req.responseText);
-                            const skus = result.skus.map(function (sku) {
-                                return sku.split('.')[0];
-                            });
+                            const skus = result.skus;
                             console.log('Image search', skus);
                             api('GET', '/product', {skus: skus || [], ...param}, function (response) {
                                 resolve(response);
@@ -85,7 +83,7 @@ const search = function(keyword, uploadedImage, enabledAI, param, searchBy) {
                         }
                     };
 
-                    req.open("POST", 'http://13.67.88.182:5000/get_imageskus/');
+                    req.open("POST", `${process.env.API_HOST}/ai/search`);
                     req.send(formData);
                 })
         } else if (!enabledAI) {

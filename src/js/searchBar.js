@@ -254,7 +254,7 @@ $( document ).ready(function() {
                         $('#searchProduct').attr('placeholder', 'Search Products...');
                     }
                 };
-                req.open("POST", 'http://18.162.113.148:3005/deepinfer');
+                req.open("POST", `${process.env.API_HOST}/ai/recognize`);
                 req.send(formData);
             })
         }
