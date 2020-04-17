@@ -94,7 +94,7 @@ const search = function(keyword, uploadedImage, enabledAI, param, searchBy) {
                 resolve(response);
             })
         } else {
-            $.get("http://13.67.88.182:5001/computeSimilarity", { text: keyword }, function (result) {
+            api('GET', "/ai/search", { keyword: keyword }, function (result) {
                 console.log('Enabled AI', result.skus);
                 api('GET', '/product', {skus: result.skus || [], ...param}, function (response) {
                     resolve(response);
