@@ -555,35 +555,32 @@ function request(method = 'GET', url = '', settings = {}) {
 
 const push = function (data) {
     console.log('push', data);
-    setTimeout(() => {
-        const { event, product, products } = data;
-        window.delvifyDataLayer = window.delvifyDataLayer.concat(data);
-        currentProduct = product;
-        switch (event) {
-            case 'init':
-                widgets.forEach( function (widget) {
-                    if (!widget.inited) {
-                        widget.inited = true;
-                        initWidget(widget);
-                    }
-                });
-                break;
-            case 'impression':
-            case 'click':
-            case 'add_to_cart':
-            case 'remove_from_cart':
-                recordEngagement(eventMapper(event), {
-                    SKU: product.sku
-                });
-                break;
-            case 'purchase':
-                recordEngagement('PURCHASE', {
-                    products: products.map(orderProductMapper),
-                });
-                break;
-        }
-        console.log(delvifyDataLayer);
-    }, 5);
+    const { event, product, products } = data;
+    window.delvifyDataLayer = window.delvifyDataLayer.concat(data);
+    currentProduct = product;
+    switch (event) {
+        case 'init':
+            widgets.forEach( function (widget) {
+                if (!widget.inited) {
+                    widget.inited = true;
+                    initWidget(widget);
+                }
+            });
+            break;
+        case 'impression':
+        case 'click':
+        case 'add_to_cart':
+        case 'remove_from_cart':
+            recordEngagement(eventMapper(event), {
+                SKU: product.sku
+            });
+            break;
+        case 'purchase':
+            recordEngagement('PURCHASE', {
+                products: products.map(orderProductMapper),
+            });
+            break;
+    }
 };
 
 window.recommendationRecord = recordEngagement;
@@ -599,6 +596,12 @@ window.recommendationRecord = recordEngagement;
         uid = rra;
     };
     device = deviceDetector.device;
+    const tempDataLayer = window.delvifyDataLayer.slice(0, window.delvifyDataLayer.length);
+    tempDataLayer.forEach((data, index) => {
+        const temp = data;
+        window.delvifyDataLayer.splice(index, 1);
+        push(temp);
+    });
     request('GET', 'http://ip-api.com/json')
         .then((res) => {
             geo_location = res.country;
