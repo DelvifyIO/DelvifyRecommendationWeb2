@@ -2433,7 +2433,7 @@ input.num-product::-webkit-inner-spin-button {
 .recommended-details-close {
     position: absolute;
     top: 0;
-    right: 0;
+    left: 0;
     margin: 15px;
     cursor: pointer;
 }

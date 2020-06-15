@@ -3,6 +3,19 @@ block config
     include config
 html
     head
+        script.
+            (function(w,d,s,i){
+                w['delvifyDataLayer']=w['delvifyDataLayer']||[];
+                // w[l].push({
+                //     'gtm.start': new Date().getTime(),
+                //     event: 'gtm.js'
+                // });
+                var f=d.getElementsByTagName(s)[0], j=d.createElement(s);
+                j.async=true;
+                // j.src='https://sufbmnb3yh.execute-api.ap-southeast-1.amazonaws.com/master/widget/' + i;
+                j.src='./widget.bundle.js';
+                f.parentNode.insertBefore(j,f);
+            })(window,document,'script','b5a08a5a-6542-406e-aee2-1ad48fcdc97d');
         meta(charset='UTF-8')
         meta(name='viewport', content='width=device-width, initial-scale=1.0')
         link(rel='icon', type="image/png", href='../images/icons/favicon.png')
@@ -23,9 +36,6 @@ html
         link(rel='stylesheet', type="text/css", href='../css/main.css')
         title #{title}
     body.animsition
-        noscript.
-            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TB6SJL6"
-            height="0" width="0" style="display:none;visibility:hidden"></iframe>
         include header
         block content
         include footer
@@ -42,6 +52,6 @@ html
     script(src="../vendor/sweetalert/sweetalert.min.js")
     script(src="../dist/main.bundle.js")
     script(src="../dist/password.bundle.js")
-    script(src="https://reco.delvify.io:8081/api/js?merchantid=db_2")
+    //script(src="https://reco.delvify.io:8081/api/js?merchantid=db_2")
     script(src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js")
     block scripts

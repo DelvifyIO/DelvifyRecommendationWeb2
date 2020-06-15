@@ -37,7 +37,7 @@ function displayItem(item) {
         "<span class=\"block2-price s-text8 p-r-5\">" +
         `${item.sku}` +
         "</span>" +
-        "<a href=\"product-details.html?sku=" + item.sku + "\" class=\"block2-name dis-block s-text3 p-b-5\">" +
+        "<a href=\"product-details.html?sku=" + item.sku + "\" class=\"block2-name dis-block s-text3 p-b-5 product-item\" data-sku=\"" + item.sku + "\">" +
         item.name +
         "</a>" +
         "<span class=\"block2-price m-text6 p-r-5\">" +
@@ -117,6 +117,15 @@ $( document ).ready(function() {
     if (categoryId) {
         param['categoryId'] = categoryId;
     }
+    $('.product-item').on('click', () => {
+        window.delvifyDataLayer.push({
+            event: 'click',
+            procudt: {
+                sku: $(this).attr('data-sku')
+            }
+        })
+    });
+
     if (keyword || (searchBy === 'image' && uploadedImage)) {
         if (searchBy === 'image' && uploadedImage) {
             $('#uploadButton').removeClass('d-flex').addClass('d-none');
