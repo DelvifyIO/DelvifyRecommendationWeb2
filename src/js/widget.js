@@ -583,7 +583,7 @@ const push = function (data) {
                 break;
         }
         console.log(delvifyDataLayer);
-    }, 1000);
+    }, 5);
 };
 
 window.recommendationRecord = recordEngagement;
