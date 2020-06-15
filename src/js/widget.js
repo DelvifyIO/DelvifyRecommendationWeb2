@@ -554,6 +554,7 @@ function request(method = 'GET', url = '', settings = {}) {
 }
 
 const push = function (data) {
+    console.log('push', data);
     setTimeout(() => {
         const { event, product, products } = data;
         window.delvifyDataLayer = window.delvifyDataLayer.concat(data);
