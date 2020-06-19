@@ -93,14 +93,14 @@ function getQuery()
     return vars;
 }
 
-function addQuery(url, queries = [])
+function addQuery(url, queries = {})
 {
     let newUrl = url;
     const exist = url.includes('?');
     newUrl += exist ? '&' : '?';
-    queries.forEach(function (query, index) {
-        newUrl += Object.keys(query)[0] + '=' + query[Object.keys(query)[0]];
-        if (index < queries.length - 1) {
+    Object.keys(queries).forEach(function (key, index) {
+        newUrl += key + '=' + queries[key];
+        if (index < Object.keys(queries).length - 1) {
             newUrl += '&';
         }
     });
@@ -170,10 +170,28 @@ function initWidget(widget) {
         })
             .then((res) => {
                 const skus = JSON.parse(res)['skus'].slice(0, noOfItems);
-                return request('GET', addQuery(`${GET_PRODUCTS_API}/${userID}`, [{ sku: skus.join(',') }]));
+                return request('GET', addQuery(`${GET_PRODUCTS_API}/${userID}`, { sku: skus.join(',') }));
             })};
     } else {
-
+        const orderBy = {
+            TRENDING: 'CLICK',
+            BEST_SELLING: 'PURCHASE',
+            INVENTORY: 'PURCHASE',
+        }[source];
+        const order = {
+            TRENDING: 'DESC',
+            BEST_SELLING: 'DESC',
+            INVENTORY: 'ASC',
+        }[source];
+        getItems = () => { return request('GET', addQuery(`${ENGAGEMENT_API}/${userID}`, {
+            orderBy,
+            order,
+            limit: noOfItems,
+        }))
+            .then((res) => {
+                const skus = res.map((item) => item.SKU);
+                return request('GET', addQuery(`${GET_PRODUCTS_API}/${userID}`, { sku: skus.join(',') }));
+            })};
     }
     if (placeholder) {
         getItems()
@@ -199,7 +217,8 @@ function initWidget(widget) {
                     "           </a>" +
                     "        </div>" +
                     "        <div class=\"recommended-details-content p-t-30 p-b-30 p-l-15 p-r-15\" id=\"recommendedDetailsContent\">" +
-                    "          <h4 class=\"product-detail-name m-text16 p-b-13\" id=\"recommendedDetailsName\"></h4><span class=\"m-text17\" id=\"recommendedDetailsPrice\"></span>" +
+                    "          <h4 class=\"product-detail-name m-text16 p-b-13\" id=\"recommendedDetailsName\"></h4>" +
+                    "          <span class=\"m-text17\" id=\"recommendedDetailsPrice\" hidden></span>" +
                     "          <p class=\"s-text8 p-t-10\" id=\"recommendedDetailsDescription\"></p>" +
                     "          <div class=\"btn-recommended-addcart size9 trans-0-4 m-t-10 m-b-10\" id=\"btn-recommended-addcart\">" +
                     "          </div>" +
@@ -294,7 +313,7 @@ function initWidget(widget) {
                         "<div class=\"item-slick2 p-l-15 p-r-15\">" +
                         "<div class=\"block2\">" +
                         "<div class=\"block2-img wrap-pic-w of-hidden pos-relative\">" +
-                        "<a href=\"" + addQuery(item.OriginalUrl, [{ delvifyreco: true }, { delvifyrecolocation: location }, { delvifyrecosource: source }]) + "\" class=\"recommended-product-image\" data-sku=\"" + item.SKU + "\" data-source=\"" + item.source +"\">" +
+                        "<a href=\"" + addQuery(item.OriginalUrl, { delvifyreco: true, delvifyrecolocation: location, delvifyrecosource: source }) + "\" class=\"recommended-product-image\" data-sku=\"" + item.SKU + "\" data-source=\"" + item.source +"\">" +
                         "<img src=\"" + item.Image + "\" alt=\"IMG-PRODUCT\">" +
                         "</a>" +
                         `<a href=\"javascript:void(0);\" class=\"block2-btn-more ${ overlay.enabled ? "" : "dis-none" }\">` +
@@ -305,7 +324,7 @@ function initWidget(widget) {
                         "</div>" +
                         "<div class='d-flex justify-content-between mt-1'>" +
                         `<div class='mr-1 ${ productName.enabled ? "" : "dis-none" }' style='${productName.fontSize ? `font-size: ${productName.fontSize}pt;` : ""} ${productName.family && productName.family !== 'Default' ? `font-family: ${productName.family};` : "" } ${productName.color ? `color: ${productName.color};` : "" }'>` + item.Name + "</div>" +
-                        `<div class='${ price.enabled ? "" : "dis-none" }' style='${productName.fontSize ? `font-size: ${productName.fontSize}pt;` : ""} ${productName.family && productName.family !== 'Default' ? `font-family: ${productName.family};` : "" } ${productName.color ? `color: ${productName.color};` : "" }'>` + item.Price + "</div>" +
+                        `<div hidden class='${ price.enabled ? "" : "dis-none" }' style='${productName.fontSize ? `font-size: ${productName.fontSize}pt;` : ""} ${productName.family && productName.family !== 'Default' ? `font-family: ${productName.family};` : "" } ${productName.color ? `color: ${productName.color};` : "" }'>` + item.Price + "</div>" +
                         "</div>" +
                         "</div>" +
                         "</div>");
@@ -332,7 +351,7 @@ function initWidget(widget) {
                         $(`#${tagId} #recommendedDetailsName`).text(name);
                         $(`#${tagId} #recommendedDetailsPrice`).text(`$${price}`);
                         $(`#${tagId} #recommendedDetailsDescription`).text(description);
-                        $(`#${tagId} #recommendedDetailsImageUrl`).attr('href', addQuery(originalUrl, [{ delvifyreco: true }, { delvifyrecolocation: location }, { delvifyrecosource: source }]));
+                        $(`#${tagId} #recommendedDetailsImageUrl`).attr('href', addQuery(originalUrl, { delvifyreco: true, delvifyrecolocation: location, delvifyrecosource: source }));
                         $(`#${tagId} #recommendedDetailsImageUrl`).attr('data-sku', sku);
                         $(`#${tagId} #recommendedDetailsImage`).attr('src', image);
                         $(`#${tagId} #recommendedDetails`).removeClass('dis-none');
@@ -349,7 +368,7 @@ function initWidget(widget) {
                         })
                         .then((res) => {
                             const skus = JSON.parse(res)['skus'].slice(0, 6);
-                            return request('GET', addQuery(`${GET_PRODUCTS_API}/${userID}`, [{ sku: skus.join(',') }]));
+                            return request('GET', addQuery(`${GET_PRODUCTS_API}/${userID}`, { sku: skus.join(',') }));
                         })
                         .then((cvItems) => {
                             const cvBlocks = document.getElementsByClassName("recommended-computer-vision-block");
@@ -392,7 +411,7 @@ function initWidget(widget) {
                                     moreBtn.setAttribute('data-price', cvItems[index].Price);
                                     moreBtn.setAttribute('data-image', cvItems[index].Image);
                                     moreBtn.setAttribute('data-url', cvItems[index].OriginalUrl);
-                                    imageWrapper.setAttribute('href', addQuery(cvItems[index].OriginalUrl, [{ delvifyreco: true }, { delvifyrecolocation: location }, { delvifyrecosource: source }]));
+                                    imageWrapper.setAttribute('href', addQuery(cvItems[index].OriginalUrl, { delvifyreco: true, delvifyrecolocation: location, delvifyrecosource: source }));
                                     imageWrapper.setAttribute('data-sku', cvItems[index].SKU);
                                     imageWrapper.setAttribute('data-name', cvItems[index].Name);
                                     imageWrapper.setAttribute('data-description', cvItems[index].Description);
@@ -919,6 +938,9 @@ const styles =
     "line-height: 1.5;" +
     "}" +
     "" +
+    ".real-recommendation [hidden] {" +
+    "    display: none!important;" +
+    "}" +
     ".real-recommendation .p-b-13 {padding-bottom: 13px;}" +
     "" +
     ".real-recommendation .s-text8, .s-text8 a {" +
