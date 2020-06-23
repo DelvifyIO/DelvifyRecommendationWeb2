@@ -18,7 +18,7 @@ let config = {
 const eventMapper = (event) => {
     return ({
         impression: 'IMPRESSION',
-            click: 'CLICK',
+        click: 'CLICK',
         add_to_cart: 'ADD_TO_CART',
         remove_from_cart: 'REMOVE_FROM_CART',
         purchase: 'PURCHASE',
@@ -126,27 +126,28 @@ function recordEngagement(type, options = {}) {
         source: options.source || getQuery()['delvifyrecosource'],
         computerVision: !!options.computerVision,
     };
-    switch (type) {
-        case 'WIDGET_IMPRESSION':
-        case 'IMPRESSION':
-        case 'SHOW_OVERLAY':
-        case 'CLICK':
-        case 'ADD_CART':
-        case 'PURCHASE':
-            return request('POST', `${ENGAGEMENT_API}/${userID}`, {
-                data: {
-                    type,
-                    location: data.location,
-                    source: data.source,
-                    device: data.device,
-                    sessionID: data.uid,
-                    SKU: data.SKU,
-                    products: data.products,
-                    computerVision: data.computerVision,
-                }
-            });
-            break;
-    }
+    const async = {
+        WIDGET_IMPRESSION: true,
+        IMPRESSION: true,
+        SHOW_OVERLAY: true,
+        CLICK: false,
+        ADD_TO_CART: false,
+        REMOVE_FROM_CART: false,
+        PURCHASE: false,
+    };
+    return request('POST', `${ENGAGEMENT_API}/${userID}`, {
+        data: {
+            type,
+            location: data.location,
+            source: data.source,
+            device: data.device,
+            sessionID: data.uid,
+            SKU: data.SKU,
+            products: data.products,
+            computerVision: data.computerVision,
+        },
+        async: async,
+    });
 }
 
 function initWidget(widget) {
@@ -442,32 +443,26 @@ function initWidget(widget) {
                     productsImage.onclick = function (e){
                         const sku = productsImage.getAttribute('data-sku');
                         e.preventDefault();
-                        recordEngagement("CLICK", { SKU: sku, location: location, source: source })
-                            .finally(() => {
-                                productsImage.onclick = undefined;
-                                productsImage.click();
-                            });
+                        recordEngagement("CLICK", { SKU: sku, location: location, source: source });
+                        productsImage.onclick = undefined;
+                        productsImage.click();
                     }
                 });
                 Array.from(cvProductsImages).forEach((cvProductsImage) => {
                     cvProductsImage.onclick = function (e){
                         const sku = cvProductsImage.getAttribute('data-sku');
                         e.preventDefault();
-                        recordEngagement("CLICK", { SKU: sku, location: location, source: source, computerVision: true })
-                            .finally(() => {
-                                cvProductsImage.onclick = undefined;
-                                cvProductsImage.click();
-                            });
+                        recordEngagement("CLICK", { SKU: sku, location: location, source: source, computerVision: true });
+                        cvProductsImage.onclick = undefined;
+                        cvProductsImage.click();
                     }
                 });
                 detailProductImage.onclick = function (e){
                     const sku = detailProductImage.getAttribute('data-sku');
                     e.preventDefault();
-                    recordEngagement("CLICK", { SKU: sku, location: location, source: source })
-                        .finally(() => {
-                            detailProductImage.onclick = undefined;
-                            detailProductImage.click();
-                        });
+                    recordEngagement("CLICK", { SKU: sku, location: location, source: source });
+                    detailProductImage.onclick = undefined;
+                    detailProductImage.click();
                 }
             })
     };
@@ -548,7 +543,7 @@ const deviceDetector = (function ()
 }());
 
 function request(method = 'GET', url = '', settings = {}) {
-    const { id, verbal = false, params, data, responseType, ...setting } = settings;
+    const { id, verbal = false, params, data, responseType, async = true, ...setting } = settings;
     const parsedUrl = params ? addQuery(url, params) : url;
     return new Promise(function (resolve, reject) {
         const xhttp = new XMLHttpRequest();
@@ -566,16 +561,14 @@ function request(method = 'GET', url = '', settings = {}) {
             console.log(`Request failed: ${parsedUrl}`);
             return reject(new Error(`Request failed: ${parsedUrl}`));
         };
-        xhttp.open(method, parsedUrl);
+        xhttp.open(method, parsedUrl, async);
         xhttp.setRequestHeader("Content-Type", data instanceof FormData ? "multipart/form-data" : "application/json");
         xhttp.send(data ? data instanceof FormData ? data : JSON.stringify(data) : null);
     });
 }
 
-const push = function (data) {
-    console.log('push', data);
+function push (data) {
     const { event, product, products } = data;
-    window.delvifyDataLayer = window.delvifyDataLayer.concat(data);
     currentProduct = product;
     switch (event) {
         case 'init':
@@ -602,8 +595,6 @@ const push = function (data) {
     }
 };
 
-window.recommendationRecord = recordEngagement;
-
 (function () {
     window.delvifyDataLayer['push'] = push;
     const rra = getSession('rra');
@@ -628,10 +619,10 @@ window.recommendationRecord = recordEngagement;
         .finally(() => {
             request('GET', `${CONFIG_API}/${userID}`)
                 .then((result) => {
-                    if (!result || result.length <= 0) {
+                    if (!result) {
                         console.log('No configurations');
                     } else {
-                        config = {...config, ...result[0]};
+                        config = {...config, ...result};
                         widgets = config.widgets;
                         widgets.forEach( function (widget) {
                             if (currentProduct || widget.type !== 'SIMILAR') {
