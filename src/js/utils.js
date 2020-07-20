@@ -1,6 +1,6 @@
 
 export function api(method = 'GET', url = '', param = {}, onSuccess) {
-    const { id, verbal = false, ...params } = param;
+    const { id, merchantid = 'db_2', verbal = false, ...params } = param;
     url = process.env.API_HOST + url;
     if (id) {
         url = url + `/${id}`;

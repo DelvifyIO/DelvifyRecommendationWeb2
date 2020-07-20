@@ -18,7 +18,7 @@ function displayItem(item) {
         "<div class=\"col-sm-12 col-md-6 col-lg-4 p-b-50\">" +
         "<div class=\"block2\">" +
         "<div class=\"block2-img wrap-pic-w of-hidden pos-relative\">" +
-        "<img src=\""+ item.images[0].url +"\" alt=\"IMG-PRODUCT\">" +
+        "<img src=\""+ item.image_url +"\" alt=\"IMG-PRODUCT\">" +
         "<div class=\"block2-overlay trans-0-4\">" +
         "<a href=\"#\" class=\"block2-btn-addwishlist hov-pointer trans-0-4\">" +
         "<i class=\"icon-wishlist icon_heart_alt\" aria-hidden=\"true\"></i>" +
@@ -37,11 +37,11 @@ function displayItem(item) {
         "<span class=\"block2-price s-text8 p-r-5\">" +
         `${item.sku}` +
         "</span>" +
-        "<a href=\"product-details.html?sku=" + item.sku + "\" class=\"block2-name dis-block s-text3 p-b-5\">" +
+        "<a href=\"product-details.html?sku=" + item.sku + "\" class=\"block2-name dis-block s-text3 p-b-5 product-item\" data-sku=\"" + item.sku + "\">" +
         item.name +
         "</a>" +
         "<span class=\"block2-price m-text6 p-r-5\">" +
-        `${item.currency.sign}${item.price}` +
+        `$${item.price}` +
         "</span>" +
         "</div>" +
         "</div>" +
@@ -68,16 +68,14 @@ const search = function(keyword, uploadedImage, enabledAI, param, searchBy) {
                     const file = new File([blob], uploadedImage.name);
 
                     let formData = new FormData();
-                    formData.append('file', file);
+                    formData.append('image', file);
 
                     let req = new XMLHttpRequest();
 
                     req.onreadystatechange = function(e) {
                         if (req.readyState == 4 && req.status == 200) {
                             const result = JSON.parse(req.responseText);
-                            const skus = result.skus.map(function (sku) {
-                                return sku.split('.')[0];
-                            });
+                            const skus = result.skus;
                             console.log('Image search', skus);
                             api('GET', '/product', {skus: skus || [], ...param}, function (response) {
                                 resolve(response);
@@ -85,7 +83,7 @@ const search = function(keyword, uploadedImage, enabledAI, param, searchBy) {
                         }
                     };
 
-                    req.open("POST", 'http://13.67.88.182:5000/get_imageskus/');
+                    req.open("POST", `${process.env.API_HOST}/ai/search`);
                     req.send(formData);
                 })
         } else if (!enabledAI) {
@@ -94,7 +92,7 @@ const search = function(keyword, uploadedImage, enabledAI, param, searchBy) {
                 resolve(response);
             })
         } else {
-            $.get("http://13.67.88.182:5001/computeSimilarity", { text: keyword }, function (result) {
+            api('GET', "/ai/search", { keyword: keyword }, function (result) {
                 console.log('Enabled AI', result.skus);
                 api('GET', '/product', {skus: result.skus || [], ...param}, function (response) {
                     resolve(response);
@@ -119,9 +117,19 @@ $( document ).ready(function() {
     if (categoryId) {
         param['categoryId'] = categoryId;
     }
+    $('.product-item').on('click', () => {
+        window.delvifyDataLayer.push({
+            event: 'click',
+            procudt: {
+                sku: $(this).attr('data-sku')
+            }
+        })
+    });
+
     if (keyword || (searchBy === 'image' && uploadedImage)) {
         if (searchBy === 'image' && uploadedImage) {
             $('#uploadButton').removeClass('d-flex').addClass('d-none');
+            $('#recordButton').removeClass('d-flex').addClass('d-none');
             $('#searchButton').removeClass('d-flex').addClass('d-none');
             $('#uploadSpinner').removeClass('d-none').addClass('d-flex');
             $('#uploadedImageContainer').removeClass('d-none').addClass('d-flex');
@@ -135,6 +143,7 @@ $( document ).ready(function() {
         search(keyword, uploadedImage, enabledAI, param, searchBy)
             .then((response) => {
                 $('#uploadButton').removeClass('d-none').addClass('d-flex');
+                $('#recordButton').removeClass('d-none').addClass('d-flex');
                 $('#searchButton').removeClass('d-none').addClass('d-flex');
                 $('#uploadSpinner').removeClass('d-flex').addClass('d-none');
                 $('#searchProduct').removeClass('d-none').addClass('d-block');

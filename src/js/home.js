@@ -8,7 +8,7 @@ $( document ).ready(function() {
                 list += "<div class='col-sm-10 col-md-8 col-lg-4 m-l-r-auto'>";
             }
             list += "<div class='block1 hov-img-zoom pos-relative m-b-30'>" +
-                "<img src='" + category.products[0].images[0].url + "'/>" +
+                "<img src='" + category.products[0].image_url + "'/>" +
 
                 "<div class=\"block1-wrapbtn w-size2\">" +
                 "<a href=\"product.html?category=" + category.id + "\" class=\"flex-c-m size2 m-text2 bg3 hov1 trans-0-4 t-center p-r-5 p-l-5\">" +
