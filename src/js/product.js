@@ -94,7 +94,7 @@ const search = function(keyword, uploadedImage, enabledAI, param, searchBy) {
         } else {
             api('GET', "/ai/search", { keyword: keyword }, function (result) {
                 console.log('Enabled AI', result.skus);
-                api('GET', '/product', {skus: result.skus || [], ...param}, function (response) {
+                api('GET', '/product', {skus: result.skus.join(',') || [], ...param}, function (response) {
                     resolve(response);
                 })
             });
