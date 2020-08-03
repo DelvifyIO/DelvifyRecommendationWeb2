@@ -77,7 +77,7 @@ const search = function(keyword, uploadedImage, enabledAI, param, searchBy) {
                             const result = JSON.parse(req.responseText);
                             const skus = result.skus;
                             console.log('Image search', skus);
-                            api('GET', '/product', {skus: skus || [], ...param}, function (response) {
+                            api('GET', '/product', {skus: skus.join(',') || [], ...param}, function (response) {
                                 resolve(response);
                             });
                         }
