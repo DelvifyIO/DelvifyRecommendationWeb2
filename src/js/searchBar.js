@@ -73,9 +73,7 @@ $( document ).ready(function() {
         '<button class="flex-c-m size5 color2 color0-hov trans-0-4 d-flex" type="button" id="recordButton">' +
         '<i class="fs-20 fa fa-microphone" aria-hidden="true" />' +
         '</button>' +
-        '<button class="flex-c-m size5 color2 color0-hov trans-0-4 d-flex" type="button" id="uploadButton">' +
-        '<i class="fs-20 fa fa-camera" aria-hidden="true" />' +
-        '</button>' +
+        '<i style="width: 21px; height: 20px; cursor: pointer" class="delvify-icon-camera" id="uploadButton"></i>' +
         '<div class="flex-c-m size5 color2 trans-0-4 d-none" id="uploadSpinner">' +
         '<i class="fa fa-spinner fa-spin" aria-hidden="true" />' +
         '</div>' +
@@ -113,10 +111,9 @@ $( document ).ready(function() {
         '<div class="flex-c-m size5 color2 trans-0-4 d-none" id="uploadSpinner">' +
         '<i class="fa fa-spinner fa-spin" aria-hidden="true" />' +
         '</div>' +
-        '<input type="file" id="uploadInput" accept="image/*" hidden/>' +
         '<audio id="player" hidden></audio>' +
         '<button class="flex-c-m size8 color2 color0-hov trans-0-4" id="searchButton">' +
-        '<i class="fs-15 fa fa-search" aria-hidden="true" />' +
+        '<div style="width: 21px; height: 20px;" class="delvify-icon-camera"></div>' +
         '</button>' +
         '</form>' +
         '</div>'
@@ -193,12 +190,6 @@ $( document ).ready(function() {
         if (keyword) {
             window.location.href = "product.html?" + "ai=" + enabledAI +"&keyword=" + keyword;
         }
-        return false;
-    });
-
-    $('#uploadButton').on('click', function(e) {
-        e.preventDefault();
-        $('#uploadInput').click();
         return false;
     });
 

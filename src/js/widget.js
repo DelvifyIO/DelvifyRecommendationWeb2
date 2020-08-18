@@ -1,8 +1,10 @@
+const userID = 'b5a08a5a-6542-406e-aee2-1ad48fcdc97d';
+const environment = process.env.ENVIRONMENT;
 const CONFIG_API = process.env.CONFIG_API;
 const ML_SERVER_API = process.env.ML_SERVER_API;
+const API_HOST = process.env.API_HOST || 'http://localhost:8081/api';
 const GET_PRODUCTS_API = process.env.GET_PRODUCTS_API;
 const ENGAGEMENT_API = process.env.ENGAGEMENT_API;
-const userID = 'b5a08a5a-6542-406e-aee2-1ad48fcdc97d';
 const ALPHAVANTAGE_API_KEY = process.env.ALPHAVANTAGE_API_KEY;
 let uid = '';
 let geo_location = '';
@@ -14,6 +16,10 @@ let config = {
     overlay: { enabled: false, computerVision: false },
     widgets: [],
 }, widgets = [], currentProduct = null;
+
+if (environment !== 'dev') {
+    console.log = () => {};
+}
 
 const eventMapper = (event) => {
     return ({
@@ -45,8 +51,8 @@ function initSlick2(parent) {
         autoplaySpeed: 6000,
         arrows: true,
         appendArrows: $(`#${parent} .wrap-slick2`),
-        prevArrow:'<button class="arrow-slick2 prev-slick2"><div class="icon-left-arrow" aria-hidden="true"></div></button>',
-        nextArrow:'<button class="arrow-slick2 next-slick2"><div class="icon-right-arrow" aria-hidden="true"></div></button>',
+        prevArrow:'<button class="arrow-slick2 prev-slick2"><div class="delvify-icon-left-arrow" aria-hidden="true"></div></button>',
+        nextArrow:'<button class="arrow-slick2 next-slick2"><div class="delvify-icon-right-arrow" aria-hidden="true"></div></button>',
         responsive: [
             {
                 breakpoint: 1200,
@@ -151,9 +157,12 @@ function recordEngagement(type, options = {}) {
 }
 
 function initWidget(widget) {
+    if (widget.init) return;
+    console.log('initWidget', widget);
     const { location, type: source, heading: title, tagId, noOfItems } = widget;
     const { heading, productName, price, overlay } = config;
-    const placeholder = document.getElementById(tagId);
+    const placeholder = $(`#${tagId}`);
+    console.log(tagId, placeholder);
     let getItems = null;
     let url = {
         TRENDING: '/recommendation/trending',
@@ -198,99 +207,99 @@ function initWidget(widget) {
         getItems()
             .then(items => {
                 recordEngagement('WIDGET_IMPRESSION', { location: location, source: source });
-
-                $(`#${tagId}`).addClass("real-recommendation")
+                const tag = $(`#${tagId}`);
+                tag.addClass("real-recommendation")
                 .addClass("animated")
                 .append(
                     styles +
-                    "<section style=\"background-color: #f7f7f7; padding-top: 45px; padding-bottom: 105px\">" +
-                    "  <div class=\"container\">" +
+                    "<section style=\"padding-bottom: 105px\">" +
+                    "  <div class=\"container\" style='margin: auto'>" +
                     `    <div style="padding-bottom: 30px; ${ heading.enabled ? "" : "dis-none" }">` +
-                    `      <h3 class=\"m-text5 t-center\" style='${ heading.fontSize ? `font-size: ${heading.fontSize}pt;` : ""} ${ heading.family && heading.family !== 'Default' ? `font-family: ${heading.family};` : "" } ${ heading.color ? `color: ${heading.color};` : "" }'>` + title + "</h3>" +
+                    `      <h3 class=\"real-recommendation-text5 t-center\" style='${ heading.fontSize ? `font-size: ${heading.fontSize}pt;` : ""} ${ heading.family && heading.family !== 'Default' ? `font-family: ${heading.family};` : "" } ${ heading.color ? `color: ${heading.color};` : "" }'>` + title + "</h3>" +
                     "    </div>" +
                     "    <!-- Slide2-->" +
                     "    <div class=\"wrap-slick2\">" +
                     "      <div class=\"slick2\" id=\"recommendedProducts\"></div>" +
                     "      <div class=\"recommended-details trans-0-5 w-size-0 op-0-0 shadow1 dis-none\" id=\"recommendedDetails\">" +
-                    "        <div class=\"recommended-details-image wrap-pic-w p-t-30 p-b-30 p-l-15 p-r-15\" style=\"max-height: 400px\">" +
+                    "        <div class=\"recommended-details-image wrap-pic-w p-t-30 p-b-30 p-l-50 p-r-15\" style=\"max-height: 400px\">" +
                     "           <a id='recommendedDetailsImageUrl'>" +
                     "           <img style=\"height: 100%\" id=\"recommendedDetailsImage\"/>" +
                     "           </a>" +
                     "        </div>" +
                     "        <div class=\"recommended-details-content p-t-30 p-b-30 p-l-15 p-r-15\" id=\"recommendedDetailsContent\">" +
-                    "          <h4 class=\"product-detail-name m-text16 p-b-13\" id=\"recommendedDetailsName\"></h4>" +
+                    "          <h4 class=\"product-detail-name real-recommendation-text16 p-b-13\" id=\"recommendedDetailsName\"></h4>" +
                     "          <span class=\"m-text17\" id=\"recommendedDetailsPrice\" hidden></span>" +
-                    "          <p class=\"s-text8 p-t-10\" id=\"recommendedDetailsDescription\"></p>" +
-                    "          <div class=\"btn-recommended-addcart size9 trans-0-4 m-t-10 m-b-10\" id=\"btn-recommended-addcart\">" +
+                    "          <p class=\"real-recommendation-text8 p-t-10\" id=\"recommendedDetailsDescription\"></p>" +
+                    "          <div class=\"btn-recommended-addcart size9 trans-0-4 m-t-10 m-b-10 dis-none\" id=\"btn-recommended-addcart\">" +
                     "          </div>" +
                     "        </div>" +
                     `        <div class='recommended-computer-vision ${ overlay.computerVision ? '' : 'dis-none' }'>` +
                     "           <div class='recommended-computer-vision-row'>" +
                     "             <div class='recommended-computer-vision-block shadow1'>" +
-                    "               <div class=\"recommended-computer-vision-loading icon-loading\"></div>" +
+                    "               <div class=\"recommended-computer-vision-loading delvify-icon-loading\"></div>" +
                     "               <a class=\"recommended-computer-vision-image-wrapper dis-none\">" +
                     "                 <img class=\"recommended-computer-vision-image\" width='100%' height='100%'/>" +
                     "               </a>" +
                     `               <a href=\"javascript:void(0);\" class=\"block2-btn-more dis-none\">` +
                     "                  <div class=\"btn-more-ctn flex-c-m shadow1\" >" +
-                    "                    <div style='width: 16px; height: 16px;' class='icon-cv' />" +
+                    "                    <div style='width: 16px; height: 16px;' class='delvify-icon-cv' />" +
                     "                  </div>" +
                     "               </a>" +
                     "             </div>" +
                     "             <div class='recommended-computer-vision-block shadow1'>" +
-                    "               <div class=\"recommended-computer-vision-loading icon-loading\"></div>" +
+                    "               <div class=\"recommended-computer-vision-loading delvify-icon-loading\"></div>" +
                     "               <a class=\"recommended-computer-vision-image-wrapper dis-none\">" +
                     "                 <img class=\"recommended-computer-vision-image\"/>" +
                     "               </a>" +
                     `               <a href=\"javascript:void(0);\" class=\"block2-btn-more dis-none\">` +
                     "                  <div class=\"btn-more-ctn flex-c-m shadow1\" >" +
-                    "                    <div style='width: 16px; height: 16px;' class='icon-cv' />" +
+                    "                    <div style='width: 16px; height: 16px;' class='delvify-icon-cv' />" +
                     "                  </div>" +
                     "               </a>" +
                     "             </div>" +
                     "             <div class='recommended-computer-vision-block shadow1'>" +
-                    "               <div class=\"recommended-computer-vision-loading icon-loading\"></div>" +
+                    "               <div class=\"recommended-computer-vision-loading delvify-icon-loading\"></div>" +
                     "               <a class=\"recommended-computer-vision-image-wrapper dis-none\">" +
                     "                 <img class=\"recommended-computer-vision-image\"/>" +
                     "               </a>" +
                     `               <a href=\"javascript:void(0);\" class=\"block2-btn-more dis-none\">` +
                     "                  <div class=\"btn-more-ctn flex-c-m shadow1\" >" +
-                    "                    <div style='width: 16px; height: 16px;' class='icon-cv' />" +
+                    "                    <div style='width: 16px; height: 16px;' class='delvify-icon-cv' />" +
                     "                  </div>" +
                     "               </a>" +
                     "             </div>" +
                     "           </div>" +
                     "           <div class='recommended-computer-vision-row'>" +
                     "             <div class='recommended-computer-vision-block shadow1'>" +
-                    "               <div class=\"recommended-computer-vision-loading icon-loading\"></div>" +
+                    "               <div class=\"recommended-computer-vision-loading delvify-icon-loading\"></div>" +
                     "               <a class=\"recommended-computer-vision-image-wrapper dis-none\">" +
                     "                 <img class=\"recommended-computer-vision-image\"/>" +
                     "               </a>" +
                     `               <a href=\"javascript:void(0);\" class=\"block2-btn-more dis-none\">` +
                     "                  <div class=\"btn-more-ctn flex-c-m shadow1\" >" +
-                    "                    <div style='width: 16px; height: 16px;' class='icon-cv' />" +
+                    "                    <div style='width: 16px; height: 16px;' class='delvify-icon-cv' />" +
                     "                  </div>" +
                     "               </a>" +
                     "             </div>" +
                     "             <div class='recommended-computer-vision-block shadow1'>" +
-                    "               <div class=\"recommended-computer-vision-loading icon-loading\"></div>" +
+                    "               <div class=\"recommended-computer-vision-loading delvify-icon-loading\"></div>" +
                     "               <a class=\"recommended-computer-vision-image-wrapper dis-none\">" +
                     "                 <img class=\"recommended-computer-vision-image\"/>" +
                     "               </a>" +
                     `               <a href=\"javascript:void(0);\" class=\"block2-btn-more dis-none\">` +
                     "                  <div class=\"btn-more-ctn flex-c-m shadow1\" >" +
-                    "                    <div style='width: 16px; height: 16px;' class='icon-cv' />" +
+                    "                    <div style='width: 16px; height: 16px;' class='delvify-icon-cv' />" +
                     "                  </div>" +
                     "               </a>" +
                     "             </div>" +
                     "             <div class='recommended-computer-vision-block shadow1'>" +
-                    "               <div class=\"recommended-computer-vision-loading icon-loading\"></div>" +
+                    "               <div class=\"recommended-computer-vision-loading delvify-icon-loading\"></div>" +
                     "               <a class=\"recommended-computer-vision-image-wrapper dis-none\">" +
                     "                 <img class=\"recommended-computer-vision-image\"/>" +
                     "               </a>" +
                     `               <a href=\"javascript:void(0);\" class=\"block2-btn-more dis-none\">` +
                     "                  <div class=\"btn-more-ctn flex-c-m shadow1\" >" +
-                    "                    <div style='width: 16px; height: 16px;' class='icon-cv' />" +
+                    "                    <div style='width: 16px; height: 16px;' class='delvify-icon-cv' />" +
                     "                  </div>" +
                     "               </a>" +
                     "             </div>" +
@@ -298,7 +307,7 @@ function initWidget(widget) {
                     "           <div class='recommended-computer-vision-label'>Similar Looks powered by Delvify</div>" +
 
                     "        </div>" +
-                    "        <div class=\"recommended-details-close\" id=\"recommendedDetailsClose\"><div class=\"icon-close\"></div></div>" +
+                    "        <div class=\"recommended-details-close\" id=\"recommendedDetailsClose\"><div class=\"delvify-icon-close\"></div></div>" +
                     "      </div>" +
                     "    </div>" +
                     "  </div>" +
@@ -306,6 +315,7 @@ function initWidget(widget) {
                 );
 
                 initSlick2();
+                const disableOverlay = tag.attr('data-disableai');
                 items.forEach((item, index) => {
                     item.source = source;
                     recordEngagement('IMPRESSION', { SKU: item.SKU, location: location, source: source });
@@ -317,14 +327,14 @@ function initWidget(widget) {
                         "<a href=\"" + addQuery(item.OriginalUrl, { delvifyreco: true, delvifyrecolocation: location, delvifyrecosource: source }) + "\" class=\"recommended-product-image\" data-sku=\"" + item.SKU + "\" data-source=\"" + item.source +"\">" +
                         "<img src=\"" + item.Image + "\" alt=\"IMG-PRODUCT\">" +
                         "</a>" +
-                        `<a href=\"javascript:void(0);\" class=\"block2-btn-more ${ overlay.enabled ? "" : "dis-none" }\">` +
+                        `<a href=\"javascript:void(0);\" class=\"block2-btn-more ${ overlay.enabled && !disableOverlay ? "" : "dis-none" }\">` +
                         "<div class=\"btn-more-ctn flex-c-m shadow1\" data-sku=\"" + item.SKU + "\" data-name=\"" + item.Name + "\" data-price=\"" + item.Price + "\" data-description=\"" + item.Description + "\" data-image=\"" + item.Image + "\" data-url=\"" + item.OriginalUrl + "\" >" +
-                        `<div style='width: 16px; height: 16px;' class='${ overlay.computerVision ? 'icon-cv' : 'icon-bars' }' />` +
+                        `<div style='width: 16px; height: 16px;' class='${ overlay.computerVision ? 'delvify-icon-cv' : 'delvify-icon-bars' }' />` +
                         "</div>" +
                         "</a>" +
                         "</div>" +
                         "<div class='d-flex justify-content-between mt-1'>" +
-                        `<div class='mr-1 ${ productName.enabled ? "" : "dis-none" }' style='${productName.fontSize ? `font-size: ${productName.fontSize}pt;` : ""} ${productName.family && productName.family !== 'Default' ? `font-family: ${productName.family};` : "" } ${productName.color ? `color: ${productName.color};` : "" }'>` + item.Name + "</div>" +
+                        `<div class='mr-1 text-left ${ productName.enabled ? "" : "dis-none" }' style='${productName.fontSize ? `font-size: ${productName.fontSize}pt;` : ""} ${productName.family && productName.family !== 'Default' ? `font-family: ${productName.family};` : "" } ${productName.color ? `color: ${productName.color};` : "" }'>` + item.Name + "</div>" +
                         `<div hidden class='${ price.enabled ? "" : "dis-none" }' style='${productName.fontSize ? `font-size: ${productName.fontSize}pt;` : ""} ${productName.family && productName.family !== 'Default' ? `font-family: ${productName.family};` : "" } ${productName.color ? `color: ${productName.color};` : "" }'>` + item.Price + "</div>" +
                         "</div>" +
                         "</div>" +
@@ -335,7 +345,7 @@ function initWidget(widget) {
                 initSlick2(tagId);
 
                 //On Detail Click
-                const moreBtns = placeholder.getElementsByClassName('btn-more-ctn');
+                const moreBtns = $(`#${tagId} .btn-more-ctn`);
                 Array.from(moreBtns).forEach((button) => {
                     button.onclick = (e) => {
                         const sku = button.getAttribute('data-sku');
@@ -464,7 +474,8 @@ function initWidget(widget) {
                     detailProductImage.onclick = undefined;
                     detailProductImage.click();
                 }
-            })
+            });
+            widget.init = true;
     };
 }
 
@@ -518,7 +529,118 @@ const resetCVBlocks = () => {
         imageWrapper.removeAttribute('data-image');
         imageWrapper.classList.add('dis-none');
     });
-}
+};
+
+const initSmartVision = (function () {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.setAttribute('id', 'delivfysmartvisioninput');
+    input.setAttribute('accept', 'image/*');
+    input.setAttribute('hidden', true);
+    document.body.appendChild(input);
+    const uploadButton = document.getElementById('uploadButton');
+    uploadButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        $('#delivfysmartvisioninput').click();
+        return false;
+    });
+
+    const searchPanel = document.createElement('div');
+    searchPanel.setAttribute('class', 'delvify-smart-vision');
+    searchPanel.innerHTML =
+        "<div class='delvify-smart-vision-backdrop d-hidden-backdrop'></div>" +
+        "<div class='delvify-smart-vision-panel d-hidden-panel'>" +
+            "<div class='delvify-smart-vision-panel-upload'>" +
+                "<div class='delvify-smart-vision-panel-h1'>Your upload</div>" +
+                "<img src='https://delvify-recommendations-vendors.s3-ap-southeast-1.amazonaws.com/product_placeholder.png' class='delvify-smart-vision-panel-uploaded-image' id='delvifySmartVisionPanelUploadImage'/>" +
+                "<div class='delvify-smart-vision-panel-upload-button' id='delvifySmartVisionUploadButton'>" +
+                    "<i class='delvify-icon-camera'></i>" +
+                    "<div class='delvify-smart-vision-panel-h2'>Upload another image</div>" +
+                "</div>" +
+            "</div>" +
+            "<div class='delvify-smart-vision-panel-divider'></div>" +
+            "<div class='delvify-smart-vision-panel-result'>" +
+                "<div class='delvify-smart-vision-panel-h1'>Similar Items</div>" +
+                "<div id='delvifySmartVisionPanelResult' class='delvify-smart-vision-panel-result-container'>" +
+                "</div>" +
+            "</div>" +
+            "<div class='delvify-icon-close-sm' id='delvifySmartVisionCloseButton'></div>" +
+        "</div>";
+    searchPanel.setAttribute('hidden', true);
+    const backdrop = searchPanel.getElementsByClassName('delvify-smart-vision-backdrop')[0];
+    const panel = searchPanel.getElementsByClassName('delvify-smart-vision-panel')[0];
+    document.body.appendChild(searchPanel);
+    const delvifySmartVisionCloseButton = document.getElementById('delvifySmartVisionCloseButton');
+    const delvifySmartVisionUploadButton = document.getElementById('delvifySmartVisionUploadButton');
+    const delvifySmartVisionPanelUploadImage = document.getElementById('delvifySmartVisionPanelUploadImage');
+    const delvifySmartVisionPanelResult = document.getElementById('delvifySmartVisionPanelResult');
+    const closePanel = function() {
+        backdrop.classList.add('d-hidden-backdrop');
+        panel.classList.add('d-hidden-panel');
+        input.value = "";
+        setTimeout(function(){
+            searchPanel.setAttribute('hidden', true);
+        }, 500);
+    };
+    backdrop.addEventListener('click', function(e) {
+        closePanel();
+    });
+    delvifySmartVisionCloseButton.addEventListener('click', function(e) {
+        closePanel();
+    });
+    delvifySmartVisionUploadButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        $('#delivfysmartvisioninput').click();
+        return false;
+    });
+    input.addEventListener('change', function(e) {
+        if ($(this).prop('files').length > 0) {
+            const file = $(this).prop('files')[0];
+            delvifySmartVisionPanelResult.innerHTML =
+                "<div class='delvify-smart-vision-panel-result-block image-loading'>" +
+                "<img src='https://delvify-recommendations-vendors.s3-ap-southeast-1.amazonaws.com/placeholder_1.png'/>" +
+                "</div>" +
+                "<div class='delvify-smart-vision-panel-result-block image-loading'>" +
+                "<img src='https://delvify-recommendations-vendors.s3-ap-southeast-1.amazonaws.com/placeholder_2.png'/>" +
+                "</div>" +
+                "<div class='delvify-smart-vision-panel-result-block image-loading'>" +
+                "<img src='https://delvify-recommendations-vendors.s3-ap-southeast-1.amazonaws.com/placeholder_3.png'/>" +
+                "</div>" +
+                "<div class='delvify-smart-vision-panel-result-block image-loading'>" +
+                "<img src='https://delvify-recommendations-vendors.s3-ap-southeast-1.amazonaws.com/placeholder_4.png'/>" +
+                "</div>";
+            searchPanel.removeAttribute('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('d-hidden-backdrop');
+                panel.classList.remove('d-hidden-panel');
+            }, 200);
+            delvifySmartVisionPanelUploadImage.setAttribute('src', URL.createObjectURL(file));
+
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            request('POST', `${API_HOST}/fs/imageSearch/${userID}`, { data: formData })
+                .then((res) => {
+                    const skus = res.skus;
+                    return request('GET', addQuery(`${GET_PRODUCTS_API}/${userID}`, { sku: skus.join(',') }));
+                })
+                .then((products) => {
+                    const eles = products.map((product) => `
+                        <a href='${addQuery(product.OriginalUrl, { delvifyreco: true, delvifyrecolocation: 'search', delvifyrecosource: 'search' })}' class='delvify-smart-vision-panel-result-block'>
+                            <img src='${product.Image}'/>
+                            <div class='delvify-smart-vision-panel-result-description'>${product.Name}</div>
+                            <div class='delvify-smart-vision-panel-h3 delvify-smart-vision-panel-result-price'>$${product.Price}</div>
+                        </a>`
+                    );
+                    delvifySmartVisionPanelResult.innerHTML = eles.join('');
+                })
+                .catch(() => {
+                    delvifySmartVisionPanelResult.innerHTML = 'No Results';
+                });
+        }
+    });
+});
 
 const deviceDetector = (function ()
 {
@@ -562,19 +684,19 @@ function request(method = 'GET', url = '', settings = {}) {
             return reject(new Error(`Request failed: ${parsedUrl}`));
         };
         xhttp.open(method, parsedUrl, async);
-        xhttp.setRequestHeader("Content-Type", data instanceof FormData ? "multipart/form-data" : "application/json");
+        // xhttp.setRequestHeader("Content-Type", data instanceof FormData ? false : "application/json");
         xhttp.send(data ? data instanceof FormData ? data : JSON.stringify(data) : null);
     });
 }
 
 function push (data) {
-    const { event, product, products } = data;
-    currentProduct = product;
+    console.log('push', data);
+    const { event, product, products, tagId } = data;
+    currentProduct = product || currentProduct;
     switch (event) {
-        case 'init':
+        case 'reinit':
             widgets.forEach( function (widget) {
-                if (!widget.inited) {
-                    widget.inited = true;
+                if (widget.tagId === tagId) {
                     initWidget(widget);
                 }
             });
@@ -596,7 +718,6 @@ function push (data) {
 };
 
 (function () {
-    window.delvifyDataLayer['push'] = push;
     const rra = getSession('rra');
     if (!rra) {
         const rand = Math.floor(Math.random() * 2147483647);
@@ -606,12 +727,6 @@ function push (data) {
         uid = rra;
     };
     device = deviceDetector.device;
-    const tempDataLayer = window.delvifyDataLayer.slice(0, window.delvifyDataLayer.length);
-    tempDataLayer.forEach((data, index) => {
-        const temp = data;
-        window.delvifyDataLayer.splice(index, 1);
-        push(temp);
-    });
     request('GET', 'http://ip-api.com/json')
         .then((res) => {
             geo_location = res.country;
@@ -622,14 +737,23 @@ function push (data) {
                     if (!result) {
                         console.log('No configurations');
                     } else {
+                        const tempDataLayer = window.delvifyDataLayer.slice(0, window.delvifyDataLayer.length);
+                        console.log('tempDataLayer', tempDataLayer);
+                        tempDataLayer.forEach((data, index) => {
+                            const temp = data;
+                            window.delvifyDataLayer.splice(index, 1);
+                            push(temp);
+                        });
+                        window.delvifyDataLayer['push'] = push;
                         config = {...config, ...result};
                         widgets = config.widgets;
+                        console.log('currentProduct', currentProduct);
                         widgets.forEach( function (widget) {
                             if (currentProduct || widget.type !== 'SIMILAR') {
-                                widget.inited = true;
                                 initWidget(widget);
                             }
                         })
+                        initSmartVision();
                     }
                 });
         })
@@ -844,7 +968,6 @@ const styles =
     "    justify-content: center;" +
     "    z-index: 101;" +
     "    flex-wrap: wrap;" +
-    "    padding-left: 46px;" +
     "}" +
     "" +
     ".real-recommendation .recommended-details-close {" +
@@ -878,6 +1001,7 @@ const styles =
     "" +
     ".real-recommendation .recommended-details-content {" +
     "    flex: 1;" +
+    "    min-width: 200px;" +
     "}" +
     ".real-recommendation .trans-0-4 {" +
     "-webkit-transition: all 0.4s;" +
@@ -898,11 +1022,10 @@ const styles =
     "}" +
     ".real-recommendation .p-b-60 {padding-bottom: 60px;}" +
     "" +
-    ".real-recommendation .m-text5 {" +
+    ".real-recommendation .real-recommendation-text5 {" +
     "font-size: 30px;" +
     "color: #222222;" +
     "line-height: 1.2;" +
-    "text-transform: uppercase;" +
     "}" +
     "" +
     ".real-recommendation .t-center {text-align: center;}"+
@@ -921,9 +1044,13 @@ const styles =
     "" +
     ".real-recommendation .p-l-15 {padding-left: 15px;}" +
     "" +
+    ".real-recommendation .p-l-50 {padding-left: 50px;}" +
+    "" +
     ".real-recommendation .p-r-15 {padding-right: 15px;}" +
     ".real-recommendation .p-r-50 {padding-right: 50px;}" +
-    ".real-recommendation .m-text16 {" +
+    ".real-recommendation .real-recommendation-text16 {" +
+    "text-align: left;" +
+    "font-family: Montserrat-Regular;" +
     "font-size: 24px;" +
     "color: #222222;" +
     "line-height: 1.5;" +
@@ -934,7 +1061,8 @@ const styles =
     "}" +
     ".real-recommendation .p-b-13 {padding-bottom: 13px;}" +
     "" +
-    ".real-recommendation .s-text8, .s-text8 a {" +
+    ".real-recommendation .real-recommendation-text8, .real-recommendation-text8 a {" +
+    "text-align: left;" +
     "font-size: 13px;" +
     "color: #888888;" +
     "line-height: 1.8;" +
@@ -945,6 +1073,10 @@ const styles =
     ".real-recommendation .size9 {" +
     "width: 162px;" +
     "height: 45px;" +
+    "}" +
+    "" +
+    ".real-recommendation .text-left {" +
+    "text-align: left;" +
     "}" +
     "" +
     ".real-recommendation .m-t-10 {margin-top: 10px;}" +
@@ -979,7 +1111,6 @@ const styles =
     ".real-recommendation .s-text1 {" +
     "font-size: 15px;" +
     "color: white;" +
-    "text-transform: uppercase;" +
     "}" +
     "" +
     ".real-recommendation .shadow1 {" +
@@ -1011,46 +1142,50 @@ const styles =
     "    width: 100%;" +
     "}" +
     ".real-recommendation .bgwhite {  }" +
-    ".real-recommendation .icon-close { " +
+    ".delvify-icon-close { " +
     "   width: 20px;" +
     "   height: 20px;" +
     "   background-repeat: no-repeat;" +
     "   background-size: contain;" +
     "   background-image: url(\"data:image/svg+xml,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 40.8 40.8' style='enable-background:new 0 0 40.8 40.8;' xml:space='preserve'%3E%3Cstyle type='text/css'%3E .st0%7Bfill:%23707070;%7D%0A%3C/style%3E%3Cg id='Group_4' transform='translate(-738.086 -937.086)'%3E%3Cpath class='st0' d='M777.5,977.5c-0.3,0-0.5-0.1-0.7-0.3l-38-38c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l38,38c0.4,0.4,0.4,1,0,1.4 C778,977.4,777.8,977.5,777.5,977.5z'/%3E%3Cpath class='st0' d='M739.5,977.5c-0.3,0-0.5-0.1-0.7-0.3c-0.4-0.4-0.4-1,0-1.4l38-38c0.4-0.4,1-0.4,1.4,0s0.4,1,0,1.4l-38,38 C740,977.4,739.8,977.5,739.5,977.5z'/%3E%3C/g%3E%3C/svg%3E%0A\");" +
     " }" +
-    ".real-recommendation .icon-cv { " +
+    ".delvify-icon-close-sm {" +
+    "   background-repeat: no-repeat;" +
+    "   background-size: contain;" +
+    "   width: 18px;" +
+    "   height: 18px;" +
+    "   background-image: url(\"data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16.7988 14.6117L11.1871 9.00002L16.7988 3.3883C17.4047 2.78244 17.4047 1.80705 16.7988 1.20119C16.193 0.595331 15.2176 0.595331 14.6117 1.20119L8.99999 6.81291L3.38827 1.20119C2.78241 0.595331 1.80702 0.595331 1.20116 1.20119C0.5953 1.80705 0.5953 2.78244 1.20116 3.3883L6.81288 9.00002L1.20116 14.6117C0.5953 15.2176 0.5953 16.193 1.20116 16.7988C1.80702 17.4047 2.78241 17.4047 3.38827 16.7988L8.99999 11.1871L14.6117 16.7988C15.2176 17.4047 16.193 17.4047 16.7988 16.7988C17.4004 16.193 17.4004 15.2133 16.7988 14.6117Z' fill='%237E7E7E'/%3E%3C/svg%3E%0A\");" +
+    "}" +
+    ".delvify-icon-cv { " +
     "   background-repeat: no-repeat;" +
     "   background-size: contain;" +
     "   background-image: url(\"data:image/svg+xml,%3Csvg version='1.1' id='Capa_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 37.9 37.9' style='enable-background:new 0 0 37.9 37.9;' xml:space='preserve'%3E%3Cstyle type='text/css'%3E .st0%7Bfill:%23707070;%7D%0A%3C/style%3E%3Cg%3E%3Cpath class='st0' d='M18.9,27.8c-4.9,0-8.9-4-8.9-8.9c0-4.9,4-8.9,8.9-8.9c4.9,0,8.9,4,8.9,8.9C27.8,23.8,23.8,27.8,18.9,27.8z M18.9,12.1c-3.8,0-6.9,3.1-6.9,6.9s3.1,6.9,6.9,6.9s6.9-3.1,6.9-6.9S22.7,12.1,18.9,12.1z'/%3E%3Cg%3E%3Cpath class='st0' d='M0.8,12.6c0.4,0,0.8-0.4,0.8-0.8V3.9c0-1.3,1.1-2.4,2.4-2.4h7.9c0.4,0,0.8-0.4,0.8-0.8S12.3,0,11.8,0H3.9 C1.8,0,0,1.8,0,3.9v7.9C0,12.3,0.4,12.6,0.8,12.6z'/%3E%3Cpath class='st0' d='M33.9,0H26c-0.4,0-0.8,0.4-0.8,0.8s0.4,0.8,0.8,0.8h7.9c1.3,0,2.4,1.1,2.4,2.4v7.9c0,0.4,0.4,0.8,0.8,0.8 c0.4,0,0.8-0.4,0.8-0.8V3.9C37.9,1.8,36.1,0,33.9,0z'/%3E%3Cpath class='st0' d='M11.8,36.3H3.9c-1.3,0-2.4-1.1-2.4-2.4V26c0-0.4-0.4-0.8-0.8-0.8S0,25.6,0,26v7.9c0,2.2,1.8,3.9,3.9,3.9h7.9 c0.4,0,0.8-0.4,0.8-0.8C12.6,36.7,12.3,36.3,11.8,36.3z'/%3E%3Cpath class='st0' d='M37.1,25.3c-0.4,0-0.8,0.4-0.8,0.8v7.9c0,1.3-1.1,2.4-2.4,2.4H26c-0.4,0-0.8,0.4-0.8,0.8 c0,0.4,0.4,0.8,0.8,0.8h7.9c2.2,0,3.9-1.8,3.9-3.9V26C37.9,25.6,37.5,25.3,37.1,25.3z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A\");" +
     " }" +
-    ".real-recommendation .icon-bars { " +
+    ".delvify-icon-bars { " +
     "   background-repeat: no-repeat;" +
     "   background-size: contain;" +
     "   background-image: url(\"data:image/svg+xml,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 40 38' style='enable-background:new 0 0 40 38;' xml:space='preserve'%3E%3Cstyle type='text/css'%3E .st0%7Bfill:%23707070;%7D%0A%3C/style%3E%3Cg id='Group_6' transform='translate(-249.5 -964.5)'%3E%3Cpath class='st0' d='M288.5,966.5h-38c-0.6,0-1-0.4-1-1s0.4-1,1-1h38c0.6,0,1,0.4,1,1S289.1,966.5,288.5,966.5z'/%3E%3Cpath class='st0' d='M288.5,984.5h-38c-0.6,0-1-0.4-1-1s0.4-1,1-1h38c0.6,0,1,0.4,1,1S289.1,984.5,288.5,984.5z'/%3E%3Cpath class='st0' d='M288.5,1002.5h-38c-0.6,0-1-0.4-1-1s0.4-1,1-1h38c0.6,0,1,0.4,1,1S289.1,1002.5,288.5,1002.5z'/%3E%3C/g%3E%3C/svg%3E\");" +
     "}" +
-    ".real-recommendation .icon-left-arrow { " +
+    ".delvify-icon-left-arrow { " +
     "   background-repeat: no-repeat;" +
     "   background-size: contain;" +
     "   width: 25px;" +
     "   height: 50px;" +
     "   background-image: url(\"data:image/svg+xml,%3Csvg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='angle-left' class='svg-inline--fa fa-angle-left fa-w-8' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 512'%3E%3Cpath fill='%23888888' d='M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z'%3E%3C/path%3E%3C/svg%3E\");" +
     "}" +
-    ".real-recommendation .icon-right-arrow { " +
+    ".delvify-icon-right-arrow { " +
     "   background-repeat: no-repeat;" +
     "   background-size: contain;" +
     "   width: 25px;" +
     "   height: 50px;" +
     "   background-image: url(\"data:image/svg+xml,%3Csvg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='angle-right' class='svg-inline--fa fa-angle-right fa-w-8' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 512'%3E%3Cpath fill='%23888888' d='M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z'%3E%3C/path%3E%3C/svg%3E\");" +
     "}" +
-    ".real-recommendation .icon-loading { " +
+    ".delvify-icon-camera { " +
     "   background-repeat: no-repeat;" +
     "   background-size: contain;" +
-    "   width: 25px;" +
-    "   height: 25px;" +
-    "   -webkit-animation:spin 4s linear infinite;" +
-    "   -moz-animation:spin 4s linear infinite;" +
-    "   animation:spin 4s linear infinite;" +
-    "   background-image: url(\"data:image/svg+xml,%3Csvg version='1.1' id='Capa_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 512 512' style='enable-background:new 0 0 512 512;' xml:space='preserve'%3E%3Cstyle type='text/css'%3E .st0%7Bfill:%23707070;%7D%0A%3C/style%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M256.001,0c-8.284,0-15,6.716-15,15v96.4c0,8.284,6.716,15,15,15s15-6.716,15-15V15C271.001,6.716,264.285,0,256.001,0z' /%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M256.001,385.601c-8.284,0-15,6.716-15,15V497c0,8.284,6.716,15,15,15s15-6.716,15-15v-96.399 C271.001,392.316,264.285,385.601,256.001,385.601z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M196.691,123.272l-48.2-83.485c-4.142-7.175-13.316-9.633-20.49-5.49c-7.174,4.142-9.632,13.316-5.49,20.49l48.2,83.485 c2.778,4.813,7.82,7.502,13.004,7.502c2.545,0,5.124-0.648,7.486-2.012C198.375,139.62,200.833,130.446,196.691,123.272z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M389.491,457.212l-48.199-83.483c-4.142-7.175-13.316-9.633-20.49-5.49c-7.174,4.142-9.632,13.316-5.49,20.49 l48.199,83.483c2.778,4.813,7.82,7.502,13.004,7.502c2.545,0,5.124-0.648,7.486-2.012 C391.175,473.56,393.633,464.386,389.491,457.212z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M138.274,170.711L54.788,122.51c-7.176-4.144-16.348-1.685-20.49,5.49c-4.142,7.174-1.684,16.348,5.49,20.49 l83.486,48.202c2.362,1.364,4.941,2.012,7.486,2.012c5.184,0,10.226-2.69,13.004-7.503 C147.906,184.027,145.448,174.853,138.274,170.711z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M472.213,363.51l-83.484-48.199c-7.176-4.142-16.349-1.684-20.49,5.491c-4.142,7.175-1.684,16.349,5.49,20.49 l83.484,48.199c2.363,1.364,4.941,2.012,7.486,2.012c5.184,0,10.227-2.69,13.004-7.502 C481.845,376.825,479.387,367.651,472.213,363.51z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M111.401,241.002H15c-8.284,0-15,6.716-15,15s6.716,15,15,15h96.401c8.284,0,15-6.716,15-15 S119.685,241.002,111.401,241.002z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M497,241.002h-96.398c-8.284,0-15,6.716-15,15s6.716,15,15,15H497c8.284,0,15-6.716,15-15S505.284,241.002,497,241.002z' /%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M143.765,320.802c-4.142-7.175-13.314-9.633-20.49-5.49l-83.486,48.2c-7.174,4.142-9.632,13.316-5.49,20.49 c2.778,4.813,7.82,7.502,13.004,7.502c2.545,0,5.124-0.648,7.486-2.012l83.486-48.2 C145.449,337.15,147.907,327.976,143.765,320.802z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M477.702,128.003c-4.142-7.175-13.315-9.632-20.49-5.49l-83.484,48.2c-7.174,4.141-9.632,13.315-5.49,20.489 c2.778,4.813,7.82,7.503,13.004,7.503c2.544,0,5.124-0.648,7.486-2.012l83.484-48.2 C479.386,144.351,481.844,135.177,477.702,128.003z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M191.201,368.239c-7.174-4.144-16.349-1.685-20.49,5.49l-48.2,83.485c-4.142,7.174-1.684,16.348,5.49,20.49 c2.362,1.364,4.941,2.012,7.486,2.012c5.184,0,10.227-2.69,13.004-7.502l48.2-83.485 C200.833,381.555,198.375,372.381,191.201,368.239z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath class='st0' d='M384.001,34.3c-7.175-4.144-16.349-1.685-20.49,5.49l-48.199,83.483c-4.143,7.174-1.685,16.348,5.49,20.49 c2.362,1.364,4.941,2.012,7.486,2.012c5.184,0,10.226-2.69,13.004-7.502l48.199-83.483 C393.633,47.616,391.175,38.442,384.001,34.3z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A\");" +
+    "   width: 21.44px;" +
+    "   height: 20px;" +
+    "   background-image: url(\"data:image/svg+xml,%3Csvg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='camera' class='svg-inline--fa fa-camera fa-w-16' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23000000' d='M512 144v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V144c0-26.5 21.5-48 48-48h88l12.3-32.9c7-18.7 24.9-31.1 44.9-31.1h125.5c20 0 37.9 12.4 44.9 31.1L376 96h88c26.5 0 48 21.5 48 48zM376 288c0-66.2-53.8-120-120-120s-120 53.8-120 120 53.8 120 120 120 120-53.8 120-120zm-32 0c0 48.5-39.5 88-88 88s-88-39.5-88-88 39.5-88 88-88 88 39.5 88 88z'%3E%3C/path%3E%3C/svg%3E\");" +
     "}" +
     ".real-recommendation .mr-1 {" +
     "  margin-right: 0.25rem !important;" +
@@ -1088,9 +1223,10 @@ const styles =
     "    flex: 0 0 27%;" +
     "    position: relative;" +
     "    width: 10%;" +
+    "    min-width: 100px;" +
     "    margin: 10px;" +
-    "    height: 100%;" +
-    // "    min-height: 200px;" +
+    // "    height: 100%;" +
+    "    min-height: 200px;" +
     "    display: flex;" +
     "    align-items: center;" +
     "    justify-content: center;" +
@@ -1111,6 +1247,165 @@ const styles =
     "   color: #bcbcbc;" +
     "   font-weight: bold;" +
     "   text-align: right;" +
+    "}" +
+    ".delvify-smart-vision {" +
+    "   position: fixed;" +
+    "   width: 100%;" +
+    "   height: 100%;" +
+    "   top: 0;" +
+    "   z-index: 10000;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-backdrop {" +
+    "   cursor: pointer;" +
+    "   background-color: #efefef;" +
+    "   width: 100%;" +
+    "   height: 100%;" +
+    "   position: absolute;" +
+    "   opacity: 0.9;" +
+    "   transition: opacity 1s;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-backdrop.d-hidden-backdrop{" +
+    "   opacity: 0;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel {" +
+    "   position: relative;" +
+    "   width: 94%;" +
+    "   height: 88%;" +
+    "   background-color: #fff;" +
+    "   margin: 3.3% auto auto auto;" +
+    "   max-width: 1440px;" +
+    "   display: flex;" +
+    "   flex-direction: row;" +
+    "   opacity: 1;" +
+    "   top: 0px;" +
+    "   transition: top 0.5s, opacity 0.2s;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel.d-hidden-panel{" +
+    "   opacity: 0;" +
+    "   top: -500px;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-upload {" +
+    "   flex: 0 1 36%;" +
+    "   display: flex;" +
+    "   flex-direction: column;" +
+    "   padding: 5vh 4.8% 5vh 4.8%;" +
+    "   align-items: center;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-uploaded-image {" +
+    "   width: 100%;" +
+    "   max-height: 27%;" +
+    "   object-fit: contain;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-divider {" +
+    "   width: 3px;" +
+    "   background-color: #e7e7e7;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-upload-button {" +
+    "   display: flex;" +
+    "   flex-direction: row;" +
+    "   align-items: center;" +
+    "   padding: 5px;" +
+    "   margin-top: 4.3vh;" +
+    "   cursor: pointer;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-result {" +
+    "   overflow-y:  scroll;" +
+    "   padding: 5vh calc(4.8% - 7%) 5vh 4.8%;" +
+    "   flex: 1" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-result-container{" +
+    "   display: flex;" +
+    "   flex-direction: row;" +
+    "   flex-wrap: wrap" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-result-block{" +
+    "   width: 142px;" +
+    "   margin-bottom: 7vh;" +
+    "   margin-right: 7%;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-result-block img{" +
+    "   width: 100%;" +
+    "   object-fit: cover;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-result-block .delvify-smart-vision-panel-result-description{" +
+    "   font-family: Montserrat-Regular, sans-serif;" +
+    "   font-size: 11.7px;" +
+    "   margin-top: 23px;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-result-block .delvify-smart-vision-panel-result-price{" +
+    "    margin-top: 7.6px" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-upload-button .delvify-smart-vision-panel-h2{" +
+    "   margin-left: 14px;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-h1 {" +
+    "   font-family: Keep Calm;" +
+    "   font-weight: 500;" +
+    "   font-size: 30px;" +
+    "   line-height: 36px;" +
+    "   margin-bottom: 7.5vh;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-h2 {" +
+    "   font-family: Keep Calm;" +
+    "   font-weight: 500;" +
+    "   font-size: 14px;" +
+    "   line-height: 17px;" +
+    "}" +
+    ".delvify-smart-vision .delvify-smart-vision-panel-h3 {" +
+    "   font-family: Keep Calm;" +
+    "   font-weight: bold;" +
+    "   font-size: 11.7px;" +
+    "   line-height: 14px;" +
+    "}" +
+    ".delvify-smart-vision .delvify-icon-close-sm {" +
+    "   position: absolute;" +
+    "   margin: 2.4%;" +
+    "   padding: 5px;" +
+    "   cursor: pointer;" +
+    "   background-size: auto;" +
+    "   background-repeat: no-repeat;" +
+    "   -ms-background-position-x: center;" +
+    "   background-position-x: center;" +
+    "   -ms-background-position-y: center;" +
+    "   background-position-y: center;" +
+    "   width: 28px;" +
+    "   height: 28px;" +
+    "}" +
+    ".delvify-smart-vision-panel-result::-webkit-scrollbar {\n" +
+    "  width: 5px;" +
+    "}" +
+    ".delvify-smart-vision-panel-result::-webkit-scrollbar-thumb {\n" +
+    "  background-color: #c4c4c4;" +
+    "  border-radius: 6px" +
+    "}" +
+    ".delvify-smart-vision-panel-result::-webkit-scrollbar-thumb:hover {" +
+    "  background-color: #888888;" +
+    "}" +
+    "@keyframes imageLoading {\n" +
+    "  0%   { opacity:1; }\n" +
+    "  80%  { opacity:0.2; }\n" +
+    "  100% { opacity:1; }\n" +
+    "}\n" +
+    "@-o-keyframes imageLoading{\n" +
+    "  0%   { opacity:1; }\n" +
+    "  80%  { opacity:0.2; }\n" +
+    "  100% { opacity:1; }\n" +
+    "}\n" +
+    "@-moz-keyframes imageLoading{\n" +
+    "  0%   { opacity:1; }\n" +
+    "  80%  { opacity:0.2; }\n" +
+    "  100% { opacity:1; }\n" +
+    "}\n" +
+    "@-webkit-keyframes imageLoading{\n" +
+    "  0%   { opacity:1; }\n" +
+    "  80%  { opacity:0.2; }\n" +
+    "  100% { opacity:1; }\n" +
+    "}\n" +
+    ".image-loading {\n" +
+    "   -webkit-animation: imageLoading 1s infinite;\n" +
+    "   -moz-animation: imageLoading 1s infinite;\n" +
+    "   -o-animation: imageLoading 1s infinite;\n" +
+    "    animation: imageLoading 1s infinite;\n" +
     "}" +
     "@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }" +
     "@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }" +
