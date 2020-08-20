@@ -616,11 +616,13 @@ const initSmartVision = (function () {
             }, 200);
             delvifySmartVisionPanelUploadImage.setAttribute('src', URL.createObjectURL(file));
 
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            request('POST', `${API_HOST}/fs/imageSearch/${userID}`, { data: formData })
+            resizeImage(file)
+                .then((blob) => {
+                    const image = new File([blob], file.name);
+                    const formData = new FormData();
+                    formData.append('image', image);
+                    return request('POST', `${API_HOST}/fs/imageSearch/${userID}`, { data: formData });
+                })
                 .then((res) => {
                     const skus = res.skus;
                     return request('GET', addQuery(`${GET_PRODUCTS_API}/${userID}`, { sku: skus.join(',') }));
@@ -641,6 +643,50 @@ const initSmartVision = (function () {
         }
     });
 });
+
+const resizeImage = function (file) {
+    const MAX_WIDTH = 600;
+    const MAX_HEIGHT = 600;
+    const canvas = document.createElement('canvas');
+    canvas.setAttribute('id', 'delivfysmartvisioncanvas');
+    document.body.appendChild(canvas);
+    return new Promise((res, rej) => {
+        try {
+            let img = new Image();
+            img.src = window.URL.createObjectURL(file);
+            img.onload = function() {
+                const canvas = document.getElementById('delivfysmartvisioncanvas');
+                let ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+
+                ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    res(blob);
+                }, file.type);
+            };
+        } catch (e) {
+            return rej(e);
+        };
+    });
+};
 
 const deviceDetector = (function ()
 {
@@ -941,11 +987,6 @@ const styles =
     ".real-recommendation .prev-slick2 {" +
     "  left: -30px;" +
     "}" +
-    "" +
-    "@media (max-width: 1280px) {" +
-    "  .real-recommendation .next-slick2 {" +
-    "    right: 0px;" +
-    "  }" +
     "" +
     "  .real-recommendation .prev-slick2 {" +
     "    left: 0px;" +
@@ -1250,8 +1291,8 @@ const styles =
     "}" +
     ".delvify-smart-vision {" +
     "   position: fixed;" +
-    "   width: 100%;" +
-    "   height: 100%;" +
+    "   width: 100vw;" +
+    "   height: 100vh;" +
     "   top: 0;" +
     "   z-index: 10000;" +
     "}" +
@@ -1270,15 +1311,21 @@ const styles =
     ".delvify-smart-vision .delvify-smart-vision-panel {" +
     "   position: relative;" +
     "   width: 94%;" +
-    "   height: 88%;" +
+    "   height: 88vh;" +
     "   background-color: #fff;" +
-    "   margin: 3.3% auto auto auto;" +
+    "   margin: 1.6vh auto auto auto;" +
     "   max-width: 1440px;" +
     "   display: flex;" +
     "   flex-direction: row;" +
     "   opacity: 1;" +
     "   top: 0px;" +
     "   transition: top 0.5s, opacity 0.2s;" +
+    "}" +
+    "@media (max-width: 500px) {" +
+    "  .delvify-smart-vision .delvify-smart-vision-panel {" +
+    "    display: block;" +
+    "    overflow-y: scroll;" +
+    "  }" +
     "}" +
     ".delvify-smart-vision .delvify-smart-vision-panel.d-hidden-panel{" +
     "   opacity: 0;" +
@@ -1358,8 +1405,9 @@ const styles =
     "   line-height: 14px;" +
     "}" +
     ".delvify-smart-vision .delvify-icon-close-sm {" +
-    "   position: absolute;" +
-    "   margin: 2.4%;" +
+    "   position: fixed;" +
+    "   top: 1.5vh;" +
+    "   margin: 14px;" +
     "   padding: 5px;" +
     "   cursor: pointer;" +
     "   background-size: auto;" +
