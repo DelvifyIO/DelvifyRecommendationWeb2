@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "pug": "^2.0.3"
+    "pug": "^3.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
